@@ -43,7 +43,7 @@ struct conf{
     int monthEndDS;
     char ssid[33];
     char password[65];
-    char owm_apikey[33];
+    char owm_apikey[65];
     int  owm_tupdate;
 };
 
