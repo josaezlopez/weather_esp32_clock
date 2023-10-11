@@ -59,14 +59,15 @@ void setup() {
     delay(1000);
     tft.print(".");
     contadorConexion++;
-    if(contadorConexion > 60){
+    if(contadorConexion > 30){
       connected = false;
       break;
       }
     }
 
   if(!connected){
-    tft.printf("\r\nSin conexion a %s\r\n",setting.ssid);
+    tft.printf("\r\nNo connection to %s\r\n",setting.ssid);
+    tft.printf("\r\nErase flash memory and recompile\r\n");
     HALT;
     }
 

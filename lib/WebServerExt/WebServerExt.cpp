@@ -18,26 +18,25 @@ const char* homePage =
             </style>\
         </head>\
         <style> .div-1 {background: #EBEBEB;}\
-        div { height: 100px;margin: 0px;border: 2px solid;background-color: #FBD603;}\
+            div { height: 100px;margin: 0px;border: 2px solid;background-color: #FBD603;}\
         </style>\
         <body>\
             <h1>Wstation ESP32</h1>\
             <form action='/update/' method='post'>\
+                SSID    : <input type='text' disabled name='ssid' value='%s'><br>\
                 <div class='div-1'>\
-                SSID    : <input type='text' name='ssid' value='%s'><br>\
-                Password: <input type='text' name='password' value='%s'><br>\
-                APIKey  : <input type='text' name='apikey' value='%s' size='36'><br>\
-                Refresh time: <input type='text' name='tupdate' value='%d'><br>\
+                    Language : %s<br>\
+                    APIKey  : <input type='text' name='apikey' value='%s' size='36'><br>\
+                    Coordinates (lat,lon): <input type='text' name='coord' size='64' value='%.16f,%.16f'> Set time from coordinates <input type='checkbox' name='fromCoord' value='1' /><br>\
+                    Refresh time: <input type='text' name='tupdate' value='%d'><br>\
+                    Temperature unit: %s<br>\
                 </div>\
-                Coordinates (lat,lon): <input type='text' name='coord' value='%.16f,%.16f'> Set time from coordinates <input type='checkbox' name='fromCoord' value='1' /><br>\
-                Language : %s<br>\
                 <div class='div-1'>\
-                Time zone: %s<br>\
-                Timetable summer: %s<br>\
-                Summer time start month (last Sunday of the month): %s<br>\
-                Month of end of summer time (last Sunday of the month:: %s<br>\
+                    Time zone: %s<br>\
+                    Timetable summer: %s<br>\
+                    Summer time start month (last Sunday of the month): %s<br>\
+                    Month of end of summer time (last Sunday of the month:: %s<br>\
                 </div>\
-                Temperature unit: %s<br>\
                 <button type='submit' name='b1' value='update'>Update</button>\
             </form>\
         </body>\
@@ -190,11 +189,8 @@ void update(){
     String coordText = httpServer->arg("coord");
     String timeZone = httpServer->arg("timezone");
     String daylightSaving = httpServer->arg("dayligthsaving");
-    String ssid = httpServer->arg("ssid");
-    String password = httpServer->arg("password");
     String apikey = httpServer->arg("apikey");
     String tupdate = httpServer->arg("tupdate");
-    
     int fromCoord = httpServer->arg("fromCoord").toInt();
     int  startDS = String(httpServer->arg("startds")).toInt();
     int  endDS = String(httpServer->arg("endds")).toInt();
@@ -244,8 +240,6 @@ void update(){
     setting.monthStartDS = startDS==0 ? setting.monthStartDS : startDS;
     setting.monthEndDS = endDS==0 ? setting.monthEndDS : endDS;
 
-    strcpy(setting.ssid,ssid.c_str());
-    strcpy(setting.password,password.c_str());
     strcpy(setting.owm_apikey,apikey.c_str());
     setting.owm_tupdate = tupdate.toInt();
     
@@ -267,24 +261,20 @@ void update(){
 void handleRoot(){
    
     static char buffer[4096];
-    
-
+ 
     sprintf(buffer,homePage,
         setting.ssid,
-        setting.password,
+        selectLanguage(setting.lang).c_str(),
         setting.owm_apikey,
-        setting.owm_tupdate,
         setting.home.lat,
         setting.home.lon,
-        selectLanguage(setting.lang).c_str(),
+        setting.owm_tupdate,
+        selectUnitTemperature(setting.unitTemp).c_str(),    
         selectTimezone(setting.timeZone).c_str(),
         selectDay(setting.dayligthSaving).c_str(),
         selectMonth("startds",setting.monthStartDS).c_str(),    
-        selectMonth("endds",setting.monthEndDS).c_str(),
-        selectUnitTemperature(setting.unitTemp).c_str());    
-
-
-    
+        selectMonth("endds",setting.monthEndDS).c_str());
+   
     httpServer->send(200,"text/html",buffer);
 
 }
