@@ -118,8 +118,8 @@ bool OpenWeatherMap::dlCurrentData(){
             return false;
             }
 
-    currentData.cod = doc["cod"];       // 200 ok     
-    strncpy(currentData.errMsg,doc["message"],sizeof(currentData.errMsg)-1);
+    //currentData.cod = doc["cod"];       // 200 ok     
+    //strncpy(currentData.errMsg,doc["message"],sizeof(currentData.errMsg)-1);
 
     //Coord
     currentData._coord.lon = doc["coord"]["lon"];  
