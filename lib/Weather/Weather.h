@@ -7,8 +7,6 @@
 #include <NTPClientExt.hpp>
 #include <list>
 
-#define HALT while(true) yield()
-
 #define WEATHERTASK_NAME "WEATHER"
 #define WEATHERTASK_HEAP (9*1024)
 #define WEATHERTASK_PRIORITY    TaskParent::th_LOWEST_PRIORITY
@@ -136,7 +134,7 @@ struct polucion{
 // Class task 
 class OpenWeatherMap : public  TaskParent{
    public:
-      OpenWeatherMap(const char* _apikey,uint32_t _tUpdate);
+      OpenWeatherMap();
       
       std::list<foreCast>* getForecastList();
       Weather* getCurrentData();
@@ -174,12 +172,10 @@ class OpenWeatherMap : public  TaskParent{
       bool dlForecastData();
       bool dlPollutionData();
 
-      char APIKey[65];
       char buffer[256];
       Weather currentData;
       std::list<foreCast> foreCastList;
       polucion pollution;
-      uint32_t tUpdate;
 };
 
 

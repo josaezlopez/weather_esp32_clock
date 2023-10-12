@@ -3,30 +3,25 @@ extern conf setting;
 extern NTPClientExt* timeClient;
 extern SemaphoreHandle_t xSemaphoreData;
 
-OpenWeatherMap::OpenWeatherMap(const char* _apikey,uint32_t _tUpdate): 
+OpenWeatherMap::OpenWeatherMap(): 
     TaskParent(WEATHERTASK_NAME,WEATHERTASK_HEAP, WEATHERTASK_PRIORITY, WEATHERTASK_CORE){
-    strcpy(APIKey,_apikey);
-    tUpdate =_tUpdate * 60 * 1000;
-
 }
 
 
 void OpenWeatherMap::loop(){
     uint32_t ultActualizacion;
-    delay(1000);
-    update();
-    ultActualizacion = millis();
-    while(true){
-        if(millis()-ultActualizacion > tUpdate || flagForceUpdate){
-            log_d("Updating.\r\n");
-            update();
-            log_d("Updated.\r\n");
-            ultActualizacion = millis();
-            flagForceUpdate = false;
+    while(WiFi.status()!=WL_CONNECTED){
+        taskYIELD();
         }
-        delay(1);
+    update();
+    while(true){
+        delay(setting.owm_tupdate * 60 * 1000);
+        log_d("Updating.\r\n");
+        update();
+        log_d("Updated.\r\n");
+        flagForceUpdate = false;
+        }
     }
-}
 
 void OpenWeatherMap::update(){
     while( xSemaphoreTake( xSemaphoreData, ( TickType_t ) 500 ) != pdTRUE ){ delay(1); };
@@ -41,6 +36,14 @@ void OpenWeatherMap::update(){
 }
 
 bool  OpenWeatherMap::dlPollutionData(){
+
+    if(currentData.cod!=200){
+        log_e("Cod %d: %s\r\n",currentData.cod, currentData.errMsg);
+        validDataPollution = false;
+        updating = updatingPollutionData = false;
+        return true;
+    }
+
     HTTPClient http;
     DynamicJsonDocument doc(1100);
 
@@ -48,7 +51,7 @@ bool  OpenWeatherMap::dlPollutionData(){
     updating = updatingPollutionData = true;
 
     
-    sprintf(buffer,UrlPollution,setting.home.lat,setting.home.lon,APIKey,setting.lang);
+    sprintf(buffer,UrlPollution,setting.home.lat,setting.home.lon,setting.owm_apikey,setting.lang);
     http.begin(buffer);
     int httpResponseCode = http.GET();
     
@@ -61,6 +64,7 @@ bool  OpenWeatherMap::dlPollutionData(){
             updating = updatingPollutionData = false;
             return false;
             }
+
         //Coord
         pollution._coord.lon = doc["coord"]["lon"]; 
         pollution._coord.lat = doc["coord"]["lat"]; 
@@ -104,7 +108,7 @@ bool OpenWeatherMap::dlCurrentData(){
     validDataCurrent = false;
     updating = updatingCurrentCast = true;
 
-    sprintf(buffer,UrlCurrentData,setting.home.lat,setting.home.lon,APIKey,setting.lang);
+    sprintf(buffer,UrlCurrentData,setting.home.lat,setting.home.lon,setting.owm_apikey,setting.lang);
     http.begin(buffer);
     int httpResponseCode = http.GET();
     
@@ -117,59 +121,60 @@ bool OpenWeatherMap::dlCurrentData(){
             updating = updatingCurrentCast = false;
             return false;
             }
-
-    //currentData.cod = doc["cod"];       // 200 ok     
-    //strncpy(currentData.errMsg,doc["message"],sizeof(currentData.errMsg)-1);
-
-    //Coord
-    currentData._coord.lon = doc["coord"]["lon"];  
-    currentData._coord.lat = doc["coord"]["lat"]; 
-
-    // Weather
-    JsonObject weather = doc["weather"][0];
-    currentData._weather.id = weather["id"];
-    strcpy(currentData._weather.main , weather["main"]);
-    strcpy(currentData._weather.description ,  weather["description"]);
-    strcpy(currentData._weather.icon,  weather["icon"]);
-    //base
-    strcpy(currentData._base , doc["base"]);
-    //main
-    JsonObject main = doc["main"];
-    currentData._weather_main.temp = main["temp"];
-    currentData._weather_main.feels_like = main["feels_like"];
-    currentData._weather_main.temp_min =  main["temp_min"];
-    currentData._weather_main.temp_max = main["temp_max"];
-    currentData._weather_main.pressure =  main["pressure"];
-    currentData._weather_main.humidity  = main["humidity"];
-    //visibility
-    currentData.visibility = doc["visibility"];
-    // Wind
-    currentData._wind.speed = doc["wind"]["speed"];
-    currentData._wind.deg = doc["wind"]["deg"];
-    getNameWind((float)doc["wind"]["deg"],&currentData._wind);
-
-    //Clouds
-    currentData._clouds.all = doc["clouds"]["all"];
-    //dt
-    currentData.dt = doc["dt"];
-    //sys
-    JsonObject sys = doc["sys"];
-    currentData._sys.type = sys["type"];
-    currentData._sys.id = sys["id"];
-    strcpy(currentData._sys.country , sys["country"]);
-    currentData._sys.sunrise = sys["sunrise"];
-    currentData._sys.sunset = sys["sunset"];
-    currentData._sys.timezone = doc["timezone"];
-    currentData.id = doc["id"];
-    strcpy(currentData.name , doc["name"]);
-    currentData.cod = doc["cod"];
-
-    }
+        currentData.cod = doc["cod"];
+        if(currentData.cod!=200){
+            strncpy(currentData.errMsg,doc["message"],sizeof(currentData.errMsg)-1);
+            log_e("Cod %d: %s\r\n",currentData.cod, currentData.errMsg);
+            validDataCurrent = false;
+            updating = updatingCurrentCast = false;
+            return true;
+        }
+        //Coord
+        currentData._coord.lon = doc["coord"]["lon"];  
+        currentData._coord.lat = doc["coord"]["lat"]; 
+        // Weather
+        JsonObject weather = doc["weather"][0];
+        currentData._weather.id = weather["id"];
+        strcpy(currentData._weather.main , weather["main"]);
+        strcpy(currentData._weather.description ,  weather["description"]);
+        strcpy(currentData._weather.icon,  weather["icon"]);
+        //base
+        strcpy(currentData._base , doc["base"]);
+        //main
+        JsonObject main = doc["main"];
+        currentData._weather_main.temp = main["temp"];
+        currentData._weather_main.feels_like = main["feels_like"];
+        currentData._weather_main.temp_min =  main["temp_min"];
+        currentData._weather_main.temp_max = main["temp_max"];
+        currentData._weather_main.pressure =  main["pressure"];
+        currentData._weather_main.humidity  = main["humidity"];
+        //visibility
+        currentData.visibility = doc["visibility"];
+        // Wind
+        currentData._wind.speed = doc["wind"]["speed"];
+        currentData._wind.deg = doc["wind"]["deg"];
+        getNameWind((float)doc["wind"]["deg"],&currentData._wind);
+        //Clouds
+        currentData._clouds.all = doc["clouds"]["all"];
+        //dt
+        currentData.dt = doc["dt"];
+        //sys
+        JsonObject sys = doc["sys"];
+        currentData._sys.type = sys["type"];
+        currentData._sys.id = sys["id"];
+        strcpy(currentData._sys.country , sys["country"]);
+        currentData._sys.sunrise = sys["sunrise"];
+        currentData._sys.sunset = sys["sunset"];
+        currentData._sys.timezone = doc["timezone"];
+        currentData.id = doc["id"];
+        strcpy(currentData.name , doc["name"]);
+        currentData.cod = doc["cod"];
+        }
     else{
         validDataCurrent = false;
         updating = updatingCurrentCast = false;
         return false;
-    }
+        }
     http.end();
     validDataCurrent = true;
     updating = updatingCurrentCast = false;
@@ -177,6 +182,14 @@ bool OpenWeatherMap::dlCurrentData(){
 }
 
 bool OpenWeatherMap::dlForecastData(){
+
+    if(currentData.cod!=200){
+        log_e("Cod %d: %s\r\n",currentData.cod, currentData.errMsg);
+        validDataForeCast = false;
+        updating = updatingForeCast = false;
+        return true;
+    }
+
     HTTPClient http;
     DynamicJsonDocument doc(24576);
     String payLoad;
@@ -184,7 +197,7 @@ bool OpenWeatherMap::dlForecastData(){
     validDataForeCast = false;
     updating = updatingForeCast = true;
     
-    sprintf(buffer,UrlForecastData,setting.home.lat,setting.home.lon,APIKey,setting.lang);
+    sprintf(buffer,UrlForecastData,setting.home.lat,setting.home.lon,setting.owm_apikey,setting.lang);
     http.begin(buffer);
     int httpResponseCode = http.GET();
     
@@ -197,7 +210,8 @@ bool OpenWeatherMap::dlForecastData(){
         validDataForeCast = false;
         updating = updatingForeCast = false;
         return false;
-    }
+        }
+
     foreCastList.clear();
     foreCast item;
     weatherId weatherMain;
