@@ -21,20 +21,20 @@ char text_unidades[2][1][15] ={"uds. en ug/m3","units in g/m3"};
 
 // Task loop
 void Adafruit_ILI9341Ext::loop(){
-  
-    while(WiFi.status()!=WL_CONNECTED) 
-        delay(1);
-    suspend();
-    while(true){
-        if(xSemaphoreTake(xSemaphoreTFT,(TickType_t) 100)==pdTRUE){ 
-            printTime(50,115,ILI9341_MAGENTA,color565(0xD4,0xD1,0x2F),ILI9341_BLACK);
-            if(bme280)
-              printTemp(Location->getCurrentData(),135,0);
-            xSemaphoreGive(xSemaphoreTFT);
-            }
-        delay(250);
-        }
+  suspend();
+  while(WiFi.status()!=WL_CONNECTED){
+    taskYIELD();
     }
+  while(true){
+    if(xSemaphoreTake(xSemaphoreTFT,(TickType_t) 100 )==pdTRUE){ 
+        printTime(50,115,ILI9341_MAGENTA,color565(0xD4,0xD1,0x2F),ILI9341_BLACK);
+        if(bme280)
+          printTemp(Location->getCurrentData(),135,0);
+        xSemaphoreGive(xSemaphoreTFT);
+        }
+    delay(100);
+    }
+  }
 
 // Clear
 void Adafruit_ILI9341Ext::clear(uint16_t c=ILI9341_BLACK){
@@ -277,8 +277,8 @@ void Adafruit_ILI9341Ext::printCurrent(Weather* currentData,bool clear,Adafruit_
 
   bme280 = _bme280;
 
-  while(xSemaphoreTake(xSemaphoreTFT,(TickType_t) 100)!=pdTRUE){ 
-    delay(1);
+  if(xSemaphoreTake(xSemaphoreTFT,(TickType_t) 100)!=pdTRUE){ 
+    return;
     }
 
   

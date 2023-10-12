@@ -12,7 +12,7 @@
 
 #include <conf.h>
 
-#define HALT while(true) yield()
+#define HALT while(true) taskYIELD()
 #define ST(A) #A
 #define STR(A) ST(A)
 
@@ -88,22 +88,25 @@ void setup() {
   timeClient->setLang(setting.lang);
   debugSettings();
   // Start the OpenWeatherMap task
-  Location = new OpenWeatherMap(setting.owm_apikey,setting.owm_tupdate);
-
-}
+  Location = new OpenWeatherMap();
+  }
 
 void loop(void) {
   static uint32_t durPul;
   int nPrev;    
 
   // Wait for data 
-  while(!Location->isValidData()){
-    delay(1);
+  for(;!Location->isValidData();){
+    taskYIELD();
     }
-
+  
+  
   
   while(true){
-    if(!OTAExt.getUpload()) tft.printCurrent(Location->getCurrentData(),true,nullptr);
+    tft.resume();
+    if(!OTAExt.getUpload()){ 
+      tft.printCurrent(Location->getCurrentData(),true,nullptr);
+      }
     tft.resume();
     while(!button.getPulsacion(&durPul)){
       if(!OTAExt.getUpload() && Location->isValidData()){ 
