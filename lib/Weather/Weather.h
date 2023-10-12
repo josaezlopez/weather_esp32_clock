@@ -134,27 +134,26 @@ struct polucion{
 // Class task 
 class OpenWeatherMap : public  TaskParent{
    public:
-      OpenWeatherMap();
-      
-      std::list<foreCast>* getForecastList();
-      Weather* getCurrentData();
-      polucion* getPollution();
-      bool isValidData(){
-        return !updatingCurrentCast && !updatingForeCast && !updatingPollutionData &&
-                validDataCurrent && validDataForeCast && validDataPollution;
-      }
-
-      void forceUpdate(){ flagForceUpdate = true; }
-
-      const char pcAbv[8][3] = {"N ","NE","E ","SE","S ","SO","O ","NO"};
-      const char dirViento[2][8][10] = {"Norte","Noreste","Este","Sudeste","Sur","Sudoeste","Oeste","Noroeste",
-                                        "North","Northeast","East","Southeast","South","Southwest","West","Northwest"};
-      const char nombreViento[8][15] = {    "Tramontana ","Gregal     ","Levante    ","Siroco     ",
-                                            "Ostro      ","Garbino    ","Poniente   ","Mistral    "};
-      const char aqiPollution[2][5][20] = {"Buena","Suficiente","Moderada","Mala","Muy mala",
-                                           "Good","Fair","Moderate","Poor","Very poor"};
+        OpenWeatherMap();
+        bool isValidData();
+        Weather* getCurrentData();
+        polucion* getPollution();
+        std::list<foreCast>* getForecastList();
+        void forceUpdate();
 
    protected:
+      void loop();
+      void update();
+      bool dlCurrentData();
+      bool dlForecastData();
+      bool dlPollutionData();
+      void getNameWind(float deg,wind* wind);
+
+      char urlBuffer[256];
+      Weather currentData;
+      std::list<foreCast> foreCastList;
+      polucion pollution;
+
       bool updatingCurrentCast = false;
       bool updatingForeCast = false;
       bool updatingPollutionData = false;
@@ -164,18 +163,16 @@ class OpenWeatherMap : public  TaskParent{
       bool allUpdated = false;
       bool updating = false;
       bool flagForceUpdate = false;
+      uint32_t lastUpdate;
 
-      void update();
-      void getNameWind(float deg,wind* wind);
-      void loop();
-      bool dlCurrentData();
-      bool dlForecastData();
-      bool dlPollutionData();
+      const char pcAbv[8][3] = {"N ","NE","E ","SE","S ","SO","O ","NO"};
+      const char dirViento[2][8][10] = {"Norte","Noreste","Este","Sudeste","Sur","Sudoeste","Oeste","Noroeste",
+                                        "North","Northeast","East","Southeast","South","Southwest","West","Northwest"};
+      const char nombreViento[8][15] = {    "Tramontana ","Gregal     ","Levante    ","Siroco     ",
+                                            "Ostro      ","Garbino    ","Poniente   ","Mistral    "};
+      const char aqiPollution[2][5][20] = {"Buena","Suficiente","Moderada","Mala","Muy mala",
+                                           "Good","Fair","Moderate","Poor","Very poor"};
 
-      char buffer[256];
-      Weather currentData;
-      std::list<foreCast> foreCastList;
-      polucion pollution;
 };
 
 
