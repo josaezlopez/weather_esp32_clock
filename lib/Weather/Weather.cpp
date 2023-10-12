@@ -3,104 +3,76 @@ extern conf setting;
 extern NTPClientExt* timeClient;
 extern SemaphoreHandle_t xSemaphoreData;
 
+// Constructor
 OpenWeatherMap::OpenWeatherMap(): 
     TaskParent(WEATHERTASK_NAME,WEATHERTASK_HEAP, WEATHERTASK_PRIORITY, WEATHERTASK_CORE){
 }
 
+// true if the data is valid
+bool OpenWeatherMap::isValidData(){
+    return !updatingCurrentCast && !updatingForeCast && !updatingPollutionData &&
+            validDataCurrent && validDataForeCast && validDataPollution;
+}
 
+// Returns the structure with the current data
+Weather* OpenWeatherMap::getCurrentData(){
+    return &(this->currentData);
+}
+
+// Returns the structure with the pollution data
+polucion* OpenWeatherMap::getPollution(){
+    return &(this->pollution);
+}
+
+// Return the list of forecast data
+std::list<foreCast>* OpenWeatherMap::getForecastList(){ 
+    return &foreCastList; 
+    }
+
+void OpenWeatherMap::forceUpdate(){
+    flagForceUpdate = true; 
+    }
+
+
+// Loop task 
 void OpenWeatherMap::loop(){
     uint32_t ultActualizacion;
     while(WiFi.status()!=WL_CONNECTED){
         taskYIELD();
         }
     update();
+    flagForceUpdate = false;
+    lastUpdate = millis();
     while(true){
-        delay(setting.owm_tupdate * 60 * 1000);
-        log_d("Updating.\r\n");
-        update();
-        log_d("Updated.\r\n");
-        flagForceUpdate = false;
+        if( (millis() - lastUpdate > (setting.owm_tupdate * 60 * 1000)) || flagForceUpdate){
+            log_d("Updating.\r\n");
+            update();
+            log_d("Updated.\r\n");
+            flagForceUpdate = false;
+            lastUpdate = millis();
+            }
+        delay(500);
         }
     }
 
+/// Update all data
 void OpenWeatherMap::update(){
-    while( xSemaphoreTake( xSemaphoreData, ( TickType_t ) 500 ) != pdTRUE ){ delay(1); };
+    // Wait for semaphoreData
+    while( xSemaphoreTake( xSemaphoreData, ( TickType_t ) 500 ) != pdTRUE ){
+         delay(1); 
+         };
     bool errCD = dlCurrentData();
     log_d("Updating currentdata\r\n");
     bool errPD = dlPollutionData();
     log_d("Updating datos polucion\r\n");
     bool errFD = dlForecastData();
     log_d("Updating datos forecast\r\n");
-    xSemaphoreGive( xSemaphoreData );
+    flagForceUpdate = false;
     allUpdated = errCD && errPD && errFD;
+    xSemaphoreGive( xSemaphoreData );
 }
 
-bool  OpenWeatherMap::dlPollutionData(){
-
-    if(currentData.cod!=200){
-        log_e("Cod %d: %s\r\n",currentData.cod, currentData.errMsg);
-        validDataPollution = false;
-        updating = updatingPollutionData = false;
-        return true;
-    }
-
-    HTTPClient http;
-    DynamicJsonDocument doc(1100);
-
-    validDataPollution = false;
-    updating = updatingPollutionData = true;
-
-    
-    sprintf(buffer,UrlPollution,setting.home.lat,setting.home.lon,setting.owm_apikey,setting.lang);
-    http.begin(buffer);
-    int httpResponseCode = http.GET();
-    
-    if (httpResponseCode>0) {
-        String payLoad = http.getString();
-        DeserializationError err = deserializeJson(doc, payLoad);
-        if (err) {
-            log_e("deserializeJson() failed with code %s\r\n",err.c_str());
-            validDataPollution = false;
-            updating = updatingPollutionData = false;
-            return false;
-            }
-
-        //Coord
-        pollution._coord.lon = doc["coord"]["lon"]; 
-        pollution._coord.lat = doc["coord"]["lat"]; 
-        JsonObject list_0 = doc["list"][0];
-        pollution.n_aqi = list_0["main"]["aqi"];
-        pollution.n_aqi--;
-
-        if(strcmp("ES",setting.lang)==0)
-            strcpy(pollution.aqi,aqiPollution[0][pollution.n_aqi]);
-        else
-            strcpy(pollution.aqi,aqiPollution[1][pollution.n_aqi]);
-
-        JsonObject list_0_components = list_0["components"];
-        pollution.co =  list_0_components["co"]; 
-        pollution.no = list_0_components["no"]; 
-        pollution.no2 = list_0_components["no2"]; 
-        pollution.o3 = list_0_components["o3"]; 
-        pollution.so2 = list_0_components["so2"]; 
-        pollution.pm2_5 = list_0_components["pm2_5"]; 
-        pollution.pm10 = list_0_components["pm10"]; 
-        pollution.nh3 = list_0_components["nh3"]; 
-        pollution.dt = list_0["dt"]; 
-        }
-    else{
-        validDataPollution = false;
-        updating = updatingPollutionData = false;
-        return false;
-    }
-
-    http.end();
-    validDataPollution = true;
-    updating = updatingPollutionData = false;
-    return true;
-
-}
-
+// Download the current data
 bool OpenWeatherMap::dlCurrentData(){
     HTTPClient http;
     DynamicJsonDocument doc(1100);
@@ -108,8 +80,8 @@ bool OpenWeatherMap::dlCurrentData(){
     validDataCurrent = false;
     updating = updatingCurrentCast = true;
 
-    sprintf(buffer,UrlCurrentData,setting.home.lat,setting.home.lon,setting.owm_apikey,setting.lang);
-    http.begin(buffer);
+    sprintf(urlBuffer,UrlCurrentData,setting.home.lat,setting.home.lon,setting.owm_apikey,setting.lang);
+    http.begin(urlBuffer);
     int httpResponseCode = http.GET();
     
     if (httpResponseCode>0) {
@@ -181,6 +153,9 @@ bool OpenWeatherMap::dlCurrentData(){
     return true;
 }
 
+
+
+// Download forecasta data
 bool OpenWeatherMap::dlForecastData(){
 
     if(currentData.cod!=200){
@@ -197,8 +172,8 @@ bool OpenWeatherMap::dlForecastData(){
     validDataForeCast = false;
     updating = updatingForeCast = true;
     
-    sprintf(buffer,UrlForecastData,setting.home.lat,setting.home.lon,setting.owm_apikey,setting.lang);
-    http.begin(buffer);
+    sprintf(urlBuffer,UrlForecastData,setting.home.lat,setting.home.lon,setting.owm_apikey,setting.lang);
+    http.begin(urlBuffer);
     int httpResponseCode = http.GET();
     
     if (httpResponseCode>0) {
@@ -269,31 +244,82 @@ bool OpenWeatherMap::dlForecastData(){
 
     }
 
-Weather* OpenWeatherMap::getCurrentData(){
-    return &(this->currentData);
-}
+// Download pollution data
+bool  OpenWeatherMap::dlPollutionData(){
 
-std::list<foreCast>* OpenWeatherMap::getForecastList(){ 
-    return &foreCastList; 
+    if(currentData.cod!=200){
+        log_e("Cod %d: %s\r\n",currentData.cod, currentData.errMsg);
+        validDataPollution = false;
+        updating = updatingPollutionData = false;
+        return true;
     }
 
+    HTTPClient http;
+    DynamicJsonDocument doc(1100);
 
-polucion* OpenWeatherMap::getPollution(){
-    return &(this->pollution);
+    validDataPollution = false;
+    updating = updatingPollutionData = true;
+
+    
+    sprintf(urlBuffer,UrlPollution,setting.home.lat,setting.home.lon,setting.owm_apikey,setting.lang);
+    http.begin(urlBuffer);
+    int httpResponseCode = http.GET();
+    
+    if (httpResponseCode>0) {
+        String payLoad = http.getString();
+        DeserializationError err = deserializeJson(doc, payLoad);
+        if (err) {
+            log_e("deserializeJson() failed with code %s\r\n",err.c_str());
+            validDataPollution = false;
+            updating = updatingPollutionData = false;
+            return false;
+            }
+
+        //Coord
+        pollution._coord.lon = doc["coord"]["lon"]; 
+        pollution._coord.lat = doc["coord"]["lat"]; 
+        JsonObject list_0 = doc["list"][0];
+        pollution.n_aqi = list_0["main"]["aqi"];
+        pollution.n_aqi--;
+
+        if(strcmp("ES",setting.lang)==0)
+            strcpy(pollution.aqi,aqiPollution[0][pollution.n_aqi]);
+        else
+            strcpy(pollution.aqi,aqiPollution[1][pollution.n_aqi]);
+
+        JsonObject list_0_components = list_0["components"];
+        pollution.co =  list_0_components["co"]; 
+        pollution.no = list_0_components["no"]; 
+        pollution.no2 = list_0_components["no2"]; 
+        pollution.o3 = list_0_components["o3"]; 
+        pollution.so2 = list_0_components["so2"]; 
+        pollution.pm2_5 = list_0_components["pm2_5"]; 
+        pollution.pm10 = list_0_components["pm10"]; 
+        pollution.nh3 = list_0_components["nh3"]; 
+        pollution.dt = list_0["dt"]; 
+        }
+    else{
+        validDataPollution = false;
+        updating = updatingPollutionData = false;
+        return false;
+    }
+
+    http.end();
+    validDataPollution = true;
+    updating = updatingPollutionData = false;
+    return true;
+
 }
 
-
-/* Nombres de los vientos en mediterraneo...
-Viento del norte o Tramontana (N): de 337,5° a 22,5°
-Viento del noreste o Gregal (NE): de 22,5° a 67,6°
-Viento del este o Levante (E): de 67,5° a 112,5°
-Viento del sureste o Siroco (SE): de 112,5° a 157,5°
-Viento del sur u Ostro (S): de 157,5° a 202,5°
-Viento del suroeste: Lebeche o Garbino (SW): de 202,5° a 247,5°
-Viento del oeste o Poniente (W): de 247,5° a 292,5°
-Viento del noroeste: Mistral (NW): de 292,5° a 337,5°
-*/
-
+// Nombres de los vientos en mediterraneo...
+// Viento del norte o Tramontana (N): de 337,5° a 22,5°
+// Viento del noreste o Gregal (NE): de 22,5° a 67,6°
+// Viento del este o Levante (E): de 67,5° a 112,5°
+// Viento del sureste o Siroco (SE): de 112,5° a 157,5°
+// Viento del sur u Ostro (S): de 157,5° a 202,5°
+// Viento del suroeste: Lebeche o Garbino (SW): de 202,5° a 247,5°
+// Viento del oeste o Poniente (W): de 247,5° a 292,5°
+// Viento del noroeste: Mistral (NW): de 292,5° a 337,5°
 
 void OpenWeatherMap::getNameWind(float deg,wind* wind){
     int indice = 0;
@@ -302,13 +328,9 @@ void OpenWeatherMap::getNameWind(float deg,wind* wind){
         m=0;
     else
         m=1;
-
-
     if(deg<0 || deg>=360){
         indice = -1;
         }
-
-
     if((deg >= 0 && deg<=22.5) || (deg>=337.5 && deg<=359)){
         indice =0;
     }
