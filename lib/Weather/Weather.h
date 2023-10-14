@@ -59,13 +59,17 @@ struct weather_main{
     float temp_min;
     float temp_max;
     int pressure;
+    int sea_level;
+    int ground_level;
     int humidity;
+    float temp_kf;
 };
 
 struct wind{
     float speed;
     int deg;
     float gust;
+    int visibility;
     char dirViento[12];
     char NombreViento[12];
     char pcAbv[3];
@@ -115,6 +119,18 @@ struct foreCast{
     char hora[6];
 };
 
+//Structure for locationData (from forecast)
+struct city{
+    long id;
+    char name[32];
+    struct coord coords;
+    char country[5];
+    long population;
+    int timezone;
+    long sunrise;
+    long sunset;
+};
+
 // Structure for pollution
 struct polucion{
     coord _coord;
@@ -139,6 +155,7 @@ class OpenWeatherMap : public  TaskParent{
         Weather* getCurrentData();
         polucion* getPollution();
         std::list<foreCast>* getForecastList();
+        city getCityData() { return cityData;};
         void forceUpdate();
 
    protected:
@@ -153,6 +170,7 @@ class OpenWeatherMap : public  TaskParent{
       Weather currentData;
       std::list<foreCast> foreCastList;
       polucion pollution;
+      city cityData;
 
       bool updatingCurrentCast = false;
       bool updatingForeCast = false;
