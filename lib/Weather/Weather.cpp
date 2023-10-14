@@ -194,6 +194,7 @@ bool OpenWeatherMap::dlForecastData(){
 
     for (JsonObject list_item : doc["list"].as<JsonArray>()) {
         
+        // main
         JsonObject list_item_main = list_item["main"];
 
         item._SWeather_main.temp = list_item_main["temp"];
@@ -201,22 +202,30 @@ bool OpenWeatherMap::dlForecastData(){
         item._SWeather_main.temp_min = list_item_main["temp_min"]; 
         item._SWeather_main.temp_max = list_item_main["temp_max"]; 
         item._SWeather_main.pressure = list_item_main["pressure"]; 
+        item._SWeather_main.sea_level = list_item_main["sea_level"];
+        item._SWeather_main.ground_level = list_item_main["ground_level"];
         item._SWeather_main.humidity = list_item_main["humidity"]; 
+        item._SWeather_main.temp_kf = list_item_main["temp_kf"]; 
 
+        // weather
         JsonObject list_item_weather_0 = list_item["weather"][0];
         item._Sweather.id = list_item_weather_0["id"]; 
         strcpy(item._Sweather.main,list_item_weather_0["main"]);
         strcpy(item._Sweather.description,list_item_weather_0["description"]);
         strcpy(item._Sweather.icon,list_item_weather_0["icon"]);
+        
+        // clouds
         item._Sclouds.all =  list_item["clouds"]["all"]; 
 
+        // wind
         JsonObject list_item_wind = list_item["wind"];
         item._Swind.speed = list_item_wind["speed"]; 
         item._Swind.deg = list_item_wind["deg"]; 
         item._Swind.gust = list_item_wind["gust"]; 
-
         getNameWind(item._Swind.deg,&item._Swind);
+        item._Swind.visibility = list_item_wind["visibility"];
 
+        
         strcpy(item.pod, list_item["sys"]["pod"]); 
         strcpy(item.dt_txt, list_item["dt_txt"]); 
         // Nombre del dia
@@ -226,17 +235,28 @@ bool OpenWeatherMap::dlForecastData(){
 
         String sdt_txt = String(item.dt_txt);
         strcpy(item.hora,sdt_txt.substring(11,16).c_str());  
-
     
         foreCastList.push_back(item);
-
         }
+
     if(foreCastList.size()==0){
         validDataForeCast = false;
         updating = updatingForeCast = false;
         return false;
     }
-       
+    // city
+    JsonObject city = doc["city"];
+
+    cityData.id = city["id"]; 
+    strcpy(cityData.name,city["name"]); 
+    cityData.coords.lat = city["coord"]["lat"];
+    cityData.coords.lon = city["coord"]["lon"];
+    strcpy(cityData.country,city["country"]);
+    cityData.population = city["population"];
+    cityData.timezone = city["timezone"];
+    cityData.sunrise = city["sunrise"];
+    cityData.sunrise = city["sunset"];
+
     http.end();
     validDataForeCast = true;
     updating = updatingForeCast = false;

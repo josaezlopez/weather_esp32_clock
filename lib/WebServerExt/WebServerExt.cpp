@@ -224,6 +224,8 @@ void update(){
     setting.home.lat =  atof(coordText.substring(0,c).c_str()); 
     setting.home.lon = atof(coordText.substring(c+1).c_str());
     strcpy(setting.lang,language.c_str());
+    timeClient->setLang(setting.lang);
+    
     Location->forceUpdate(); 
 
     if(fromCoord){
