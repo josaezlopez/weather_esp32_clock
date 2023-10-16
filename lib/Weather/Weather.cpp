@@ -1,4 +1,5 @@
 #include <Weather.h>
+
 extern conf setting;
 extern NTPClientExt* timeClient;
 extern SemaphoreHandle_t xSemaphoreData;
@@ -109,6 +110,7 @@ bool OpenWeatherMap::dlCurrentData(){
         currentData._weather.id = weather["id"];
         strcpy(currentData._weather.main , weather["main"]);
         strcpy(currentData._weather.description ,  weather["description"]);
+        currentData._weather.description[0] = toupper(currentData._weather.description[0]);
         strcpy(currentData._weather.icon,  weather["icon"]);
         //base
         strcpy(currentData._base , doc["base"]);
@@ -212,6 +214,7 @@ bool OpenWeatherMap::dlForecastData(){
         item._Sweather.id = list_item_weather_0["id"]; 
         strcpy(item._Sweather.main,list_item_weather_0["main"]);
         strcpy(item._Sweather.description,list_item_weather_0["description"]);
+        item._Sweather.description[0] = toupper(item._Sweather.description[0]);
         strcpy(item._Sweather.icon,list_item_weather_0["icon"]);
         
         // clouds
@@ -224,8 +227,7 @@ bool OpenWeatherMap::dlForecastData(){
         item._Swind.gust = list_item_wind["gust"]; 
         getNameWind(item._Swind.deg,&item._Swind);
         item._Swind.visibility = list_item_wind["visibility"];
-        item.pop = 100.0 * (float) list_item_wind["pop"];
-
+        item.pop = list_item["pop"];
         
         strcpy(item.pod, list_item["sys"]["pod"]); 
         strcpy(item.dt_txt, list_item["dt_txt"]); 

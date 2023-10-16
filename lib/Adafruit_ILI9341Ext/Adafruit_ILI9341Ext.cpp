@@ -438,7 +438,7 @@ bool Adafruit_ILI9341Ext::printForecast(OpenWeatherMap* Location,bool clear,int 
       temp = temp * (9/5) + 32;
     }
 
-    printf("%s %0.f %s",it->hora,temp,setting.unitTemp);
+    printf("%s %0.f%s %0.f%s",it->hora,temp,setting.unitTemp,it->pop*100.0,"%");
     setCursor(50,n*incremento+15);
     setTextColor(ILI9341_WHITE,colorFondo);
     print(it->_Sweather.description);

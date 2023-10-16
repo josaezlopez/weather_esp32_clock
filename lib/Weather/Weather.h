@@ -117,7 +117,7 @@ struct foreCast{
     char dt_txt[20];
     char nombreDia[10];
     char hora[6];
-    int pop;
+    float pop;
 };
 
 //Structure for locationData (from forecast)
