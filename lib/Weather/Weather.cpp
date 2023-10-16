@@ -224,6 +224,7 @@ bool OpenWeatherMap::dlForecastData(){
         item._Swind.gust = list_item_wind["gust"]; 
         getNameWind(item._Swind.deg,&item._Swind);
         item._Swind.visibility = list_item_wind["visibility"];
+        item.pop = 100.0 * (float) list_item_wind["pop"];
 
         
         strcpy(item.pod, list_item["sys"]["pod"]); 
