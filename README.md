@@ -15,6 +15,7 @@ Weather station with desktop clock based on api.openweathermap.org and BME280 fo
     Weather data from openweathermaps.org
     Local temperature, humidity and pressure data from a BME280 sensor.
     Web server for configuration.
+    Weather forecast with probability of precipitation, temperature and description. 
 
 #### D1 Mini ESP32 ESP-32:
 
