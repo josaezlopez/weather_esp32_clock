@@ -10,10 +10,11 @@ Estacion meteorológica con reloj de escritorio basada en api.openweathermap.org
 
 #### Características:
 
-Reloj basado en NTP.  
-Datos del clima desde openweathermaps.org.  
-Datos de temperatura, humedad y presión locales desde un sensor BME280.  
-Servidor web para la configuración.  
+	Reloj basado en NTP.  
+	Datos del clima desde openweathermaps.org.  
+	Datos de temperatura, humedad y presión locales desde un sensor BME280.  
+	Servidor web para la configuración.
+	Previsión del tiempo con Probabilidad de precipitacion, temperatura y descripción.  
 
 #### D1 Mini ESP32 ESP-32:
 
