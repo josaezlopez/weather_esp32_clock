@@ -37,6 +37,7 @@ class Adafruit_ILI9341Ext : public Adafruit_ILI9341, public TaskParent {
 
 
     protected:
+        void printUntil(char* cad,int nCars);
         void printV(const char *str,uint16_t color,uint16_t colorFondo,uint16_t colorBorde,bool force = false);
         void printTime(int x,int y,uint16_t colorFecha,uint16_t colorReloj,uint16_t colorFondo);
         void printWind(int x,int y,Weather* currentData,uint16_t colorTexto,uint16_t colorFondo);

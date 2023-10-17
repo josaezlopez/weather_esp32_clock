@@ -18,6 +18,7 @@ char text_minima[2][1][15] = {"Minima","Minimal"};
 char text_presion[2][1][15] = {"Presion","Pressure"};
 char text_humedad[2][1][15] = {"Humedad","Humidity"};
 char text_unidades[2][1][15] ={"uds. en ug/m3","units in g/m3"};
+char text_aire[2][1][15] ={"Aire","Air"};
 
 // Task loop
 void Adafruit_ILI9341Ext::loop(){
@@ -441,7 +442,7 @@ bool Adafruit_ILI9341Ext::printForecast(OpenWeatherMap* Location,bool clear,int 
     printf("%s %0.f%s %0.f%s",it->hora,temp,setting.unitTemp,it->pop*100.0,"%");
     setCursor(50,n*incremento+15);
     setTextColor(ILI9341_WHITE,colorFondo);
-    print(it->_Sweather.description);
+    printUntil(it->_Sweather.description,15);
     drawFastHLine(50,n*incremento+33,200,ILI9341_YELLOW);
     it++;
     }
@@ -462,7 +463,7 @@ void Adafruit_ILI9341Ext::printAirQuality(polucion* pollution,bool borrar=true){
   if(borrar){
     fillScreen(colorFondo);
     setTextSize(2);
-    printV("Aire",ILI9341_WHITE,ILI9341_DARKGREY,ILI9341_CYAN);
+    printV(text_aire[0][getNumLang()],ILI9341_WHITE,ILI9341_DARKGREY,ILI9341_CYAN);
     }
 
   
@@ -592,4 +593,15 @@ void Adafruit_ILI9341Ext::printFillRight(char* cad,int maxcar,uint16_t textColor
 
 }
 
+// Print the first nCars from cad.
+void Adafruit_ILI9341Ext::printUntil(char* cad,int nCars){
+  if(strlen(cad)>nCars){
+    for(int n=0 ; n<nCars ; n++){
+      print(cad[n]);
+
+    }
+  }
+  else
+    print(cad);
+}
 
