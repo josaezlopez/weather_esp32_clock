@@ -46,7 +46,7 @@ The free apikey is used, you can get the api key from here: https://openweatherm
 
 If platformio is used, all library dependencies will be resolved correctly.
 platformio.ini comes configured with two environments: release and release_ota. release_ota allows uploading via Wi-Fi.
-After compiling and sending to esp32. It will start with the default configuration, to change it you can access **https://wstation.local**
+After compiling and sending to esp32 it will start with the default configuration, to change it you can access **https://wstation.local**
 The coordinates can be pasted from Google Maps.
 
 ![Alt text](/images/web.png)
