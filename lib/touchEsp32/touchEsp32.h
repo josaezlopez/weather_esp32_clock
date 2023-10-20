@@ -13,11 +13,13 @@ class touchEsp32 : public TaskParent {
   public:
     touchEsp32(int _pin);
     void loop();
-    int calibracion();
     bool getPulsacion();
     bool getPulsacion(uint32_t* ton);
+    QueueHandle_t getQueue() { return queue;}
 
   protected:
+    int calibracion();
+    QueueHandle_t queue;
     int pin;
     int32_t cal;
     uint32_t tPulsado;

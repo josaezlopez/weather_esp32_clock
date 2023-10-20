@@ -11,6 +11,7 @@ OpenWeatherMap::OpenWeatherMap():
 
 // true if the data is valid
 bool OpenWeatherMap::isValidData(){
+    
     return !updatingCurrentCast && !updatingForeCast && !updatingPollutionData &&
             validDataCurrent && validDataForeCast && validDataPollution;
 }
@@ -63,11 +64,11 @@ void OpenWeatherMap::update(){
          delay(1); 
          };
     bool errCD = dlCurrentData();
-    log_d("Updating currentdata\r\n");
+    log_d("Updating current data\r\n");
     bool errPD = dlPollutionData();
-    log_d("Updating datos polucion\r\n");
+    log_d("Updating polucion data\r\n");
     bool errFD = dlForecastData();
-    log_d("Updating datos forecast\r\n");
+    log_d("Updating forecast data\r\n");
     flagForceUpdate = false;
     allUpdated = errCD && errPD && errFD;
     xSemaphoreGive( xSemaphoreData );
@@ -97,7 +98,7 @@ bool OpenWeatherMap::dlCurrentData(){
         currentData.cod = doc["cod"];
         if(currentData.cod!=200){
             strncpy(currentData.errMsg,doc["message"],sizeof(currentData.errMsg)-1);
-            log_e("Cod %d: %s\r\n",currentData.cod, currentData.errMsg);
+            log_d("Cod %d: %s\r\n",currentData.cod, currentData.errMsg);
             validDataCurrent = false;
             updating = updatingCurrentCast = false;
             return true;
@@ -161,7 +162,7 @@ bool OpenWeatherMap::dlCurrentData(){
 bool OpenWeatherMap::dlForecastData(){
 
     if(currentData.cod!=200){
-        log_e("Cod %d: %s\r\n",currentData.cod, currentData.errMsg);
+        log_d("Cod %d: %s\r\n",currentData.cod, currentData.errMsg);
         validDataForeCast = false;
         updating = updatingForeCast = false;
         return true;
@@ -271,7 +272,7 @@ bool OpenWeatherMap::dlForecastData(){
 bool  OpenWeatherMap::dlPollutionData(){
 
     if(currentData.cod!=200){
-        log_e("Cod %d: %s\r\n",currentData.cod, currentData.errMsg);
+        log_d("Cod %d: %s\r\n",currentData.cod, currentData.errMsg);
         validDataPollution = false;
         updating = updatingPollutionData = false;
         return true;
