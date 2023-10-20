@@ -1,4 +1,5 @@
 # weather_esp32_clock
+[En español](LEEME.md)  
 Weather station with desktop clock based on api.openweathermap.org and BME280 for esp32 on Arduino core.
 
 
