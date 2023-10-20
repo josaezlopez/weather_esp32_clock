@@ -28,24 +28,23 @@ void Adafruit_ILI9341Ext::loop(){
     taskYIELD();
     }
   while(true){
-    if(xSemaphoreTake(xSemaphoreTFT,(TickType_t) 1 )==pdTRUE){ 
-        printTime(50,115,ILI9341_MAGENTA,color565(0xD4,0xD1,0x2F),ILI9341_BLACK);
-        if(bme280)
-          printTemp(Location->getCurrentData(),135,0);
-        xSemaphoreGive(xSemaphoreTFT);
-        }
-    delay(100);
+    if(xSemaphoreTake(xSemaphoreTFT,(TickType_t) 1 ) == pdTRUE){ 
+      printTime(50,115,ILI9341_MAGENTA,color565(0xD4,0xD1,0x2F),ILI9341_BLACK);
+      printTemp(Location->getCurrentData(),135,0);
+      xSemaphoreGive(xSemaphoreTFT);
+      }
+    delay(500);
     }
   }
 
-// Clear
+
+
 void Adafruit_ILI9341Ext::clear(uint16_t c=ILI9341_BLACK){
   if(!SPIFFS.begin()){
     log_e("SPIFFS initialisation failed!\r\n");
     while (true);
     }
   fillScreen(c);
-  setTextSize(1);
 }
 
 void Adafruit_ILI9341Ext::begin(){
@@ -54,20 +53,18 @@ void Adafruit_ILI9341Ext::begin(){
     isBegin=true;
 }
 
-// Vertical screen
+// Vertical print
 void Adafruit_ILI9341Ext::printV(const char *str,uint16_t color,uint16_t colorFondo,uint16_t colorBorde,bool force){
   static char name[50];
 
   int16_t x1,y1;
   uint16_t ancho, alto, cx=0, cy=0, textSize=3;
   
-  if(strcmp(name,str)==0 && !force){
+  if(strcmp(name,str) == 0 && !force){
     return;
   }
   
   if(strlen(str)>9) textSize = 2;
-
-
   fillRoundRect(0,0,35,320,5,colorFondo);
   drawRoundRect(0,0,35,320,5,colorBorde);
   cx+=6;
@@ -96,8 +93,8 @@ void Adafruit_ILI9341Ext::printWeatherData(Weather* currentData,bool borrar=true
   uint16_t colorDatos = ILI9341_GREEN;
   uint16_t colorFondo = ILI9341_BLACK;
 
-  if(xSemaphoreTake(xSemaphoreTFT,(TickType_t) 1)!=pdTRUE){ 
-    return;
+  while(xSemaphoreTake(xSemaphoreTFT,(TickType_t) 1) != pdTRUE){ 
+    delay(1000);
     }
 
   if(borrar){
@@ -212,6 +209,7 @@ void Adafruit_ILI9341Ext::printWeatherData(Weather* currentData,bool borrar=true
 
 // Print clock
 void Adafruit_ILI9341Ext::printTime(int x,int y,uint16_t colorFecha,uint16_t colorReloj,uint16_t colorFondo){
+ 
   fillRoundRect(x,y,190,5,5,ILI9341_CYAN);
   
   setTextSize(2);
@@ -233,6 +231,7 @@ void Adafruit_ILI9341Ext::printTime(int x,int y,uint16_t colorFecha,uint16_t col
   printf("%02d",timeClient->getSeconds());
 
   fillRoundRect(x,y+115,185,5,5,ILI9341_CYAN);
+
   }
 
 // Wind
@@ -300,7 +299,6 @@ void Adafruit_ILI9341Ext::printCurrent(Weather* currentData,bool clear,Adafruit_
     printIcon(currentData,35,0);
     }
 
-  printTemp(currentData,135,0);
   printWind(50,240,currentData,ILI9341_CYAN,ILI9341_BLACK);
   printSun(50,280,currentData,ILI9341_WHITE,ILI9341_GREEN,ILI9341_BLACK);
   xSemaphoreGive(xSemaphoreTFT);
@@ -313,6 +311,8 @@ void Adafruit_ILI9341Ext::printTemp(Weather* currentData,int x,int y){
   float temperatura;
   int presion;
   int humedad;
+  char buffer[10];
+
 
   if(!bme280){
     temperatura = currentData->_weather_main.temp + ZeroAbs;
@@ -336,14 +336,11 @@ void Adafruit_ILI9341Ext::printTemp(Weather* currentData,int x,int y){
   setTextSize(1);
   setTextColor(ILI9341_RED,ILI9341_BLACK); 
 
-  if(bme280){
+  if(bme280)
     print("local");
-  }
-  else{
+   else
     print("     ");
-  }
-
-
+   
   // Description
   setTextColor(ILI9341_CYAN,ILI9341_BLACK);
   setCursor(x-80,y+90);
@@ -354,24 +351,23 @@ void Adafruit_ILI9341Ext::printTemp(Weather* currentData,int x,int y){
   setCursor(x,y+20);
   setTextSize(3);
   setTextColor(ILI9341_GREEN,ILI9341_BLACK);
-  //printf("%2.1f%s",temperatura,setting.unitTemp);
-
-  // Show temperature as integer
   int t = round(temperatura);
-  printf("%d %s ",t,setting.unitTemp);
-
+  sprintf(buffer,"%d %s ",t,setting.unitTemp);
+  printFillRight(buffer,5,ILI9341_GREEN,ILI9341_BLACK); 
 
   // Pressure
   setCursor(x,y+45);
   setTextSize(2);
   setTextColor(ILI9341_GREEN,ILI9341_BLACK);
-  printf("%d hPa",presion);
-
+  sprintf(buffer,"%d hPa",presion);
+  printFillRight(buffer,8,ILI9341_GREEN,ILI9341_BLACK);
+  
+  
   // Humidity
   setCursor(x,y+60);
   setTextSize(2);
-  setTextColor(ILI9341_GREEN,ILI9341_BLACK);
-  printf("Hum:%d%s",humedad,"%");
+  sprintf(buffer,"Hum:%d%s",humedad,"%");
+  printFillRight(buffer,8,ILI9341_GREEN,ILI9341_BLACK);
 
 }
 
@@ -582,7 +578,7 @@ void Adafruit_ILI9341Ext::printIcon(Weather* currentData,int x,int y,bool force)
     } 
 
   while(xSemaphoreTake(xSemaphoreData,(TickType_t) 1)!=pdTRUE){ 
-    delay(1);
+    delay(100);
     }
 
   strcpy(iconFile,"/");

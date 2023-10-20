@@ -8,9 +8,6 @@
 #include <WebServerExt.h>
 #include <NTPClientExt.hpp>
 #include <funcaux.h>
-
-#define pepe CORE_DEBUG_LEVEL
-
 #include <conf.h>
 
 #define HALT while(true) taskYIELD()
@@ -109,8 +106,9 @@ void loop(void) {
 
 
   while(true){
-    tft.printCurrent(currentData,true,nullptr);    
+    tft.printCurrent(currentData,true,nullptr);  
     tft.resume();                                 
+
     log_d("Current data screen.\r\n");
     while(xQueueReceive(button.getQueue(),&durPul,1) != pdPASS){    
       if(currentDatadt != currentData->dt){
@@ -135,8 +133,11 @@ void loop(void) {
     #endif
 
     log_d("Air quality display");
-    
+    // It cannot be suspended if the traffic light is taken
+    while(xSemaphoreTake(xSemaphoreTFT,(TickType_t) 1) != pdTRUE){ vPortYield(); } 
     tft.suspend();
+    xSemaphoreGive(xSemaphoreTFT);
+    
     tft.printAirQuality(Location->getPollution(),true);     //sCREEN2
     while(xQueueReceive(button.getQueue(),&durPul,1) != pdPASS){    // while not push button
         if(currentDatadt != currentData->dt){

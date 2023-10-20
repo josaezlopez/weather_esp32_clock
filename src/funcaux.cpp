@@ -78,17 +78,17 @@ conf getConfig(){
 }
 
 void debugSettings(){
-  Serial.println("---------------------------------------");
-  Serial.printf("Enable DS: %d\r\n",setting.dayligthSaving);
-  Serial.printf("Enable Lat: %f\r\n",setting.home.lat);
-  Serial.printf("Enable Lat: %f\r\n",setting.home.lon);
-  Serial.printf("Language: %s\r\n",setting.lang);
-  Serial.printf("TimeZone: %d\r\n",setting.timeZone);
-  Serial.printf("monthEndDS: %d\r\n",setting.monthEndDS);
-  Serial.printf("monthStartDS: %d\r\n",setting.monthStartDS);
-  Serial.printf("SSID: %S\r\n",setting.ssid);
-  Serial.printf("Password: %s\r\n",setting.password);
-  Serial.printf("T_Update: %d\r\n",setting.owm_tupdate);
-  Serial.printf("ApiKey: %s\r\n",setting.owm_apikey);
-  Serial.println("--------------------------------------");
+  log_d("Enable DS: %d\r\nLat: %f\r\nLon: %f\r\nLanguage: %s\r\nTimeZone: %d\r\nmonthEndDS: %d\r\nmonthStartDS: %d\r\nSSID: %S\r\nsPassword: %s\r\nT_Update: %d\r\nApiKey: %s\r\n",
+        setting.dayligthSaving,
+        setting.home.lat,
+        setting.home.lon,
+        setting.lang,
+        setting.timeZone,
+        setting.monthEndDS,
+        setting.monthStartDS,
+        setting.ssid,
+        setting.password,
+        setting.owm_tupdate,
+        setting.owm_apikey);
+
 }

@@ -60,7 +60,7 @@ void OpenWeatherMap::loop(){
 /// Update all data
 void OpenWeatherMap::update(){
     // Wait for semaphoreData
-    while( xSemaphoreTake( xSemaphoreData, ( TickType_t ) 500 ) != pdTRUE ){
+    while( xSemaphoreTake( xSemaphoreData, ( TickType_t ) 100 ) != pdTRUE ){
          delay(1); 
          };
     bool errCD = dlCurrentData();
