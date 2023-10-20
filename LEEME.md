@@ -1,4 +1,5 @@
-# weather_esp32_clock
+# weather_esp32_clock  
+[En español](LEEME.md)  
 Estacion meteorológica con reloj de escritorio basada en api.openweathermap.org y BME280 para esp32 en Arduino core.
 
 ![Alt text](images/en_screen1.png)
