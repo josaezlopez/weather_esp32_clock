@@ -9,6 +9,7 @@
 #include <NTPClientExt.hpp>
 #include <funcaux.h>
 
+#define pepe CORE_DEBUG_LEVEL
 
 #include <conf.h>
 
@@ -38,11 +39,12 @@ conf setting;
 
 
 void setup() {
+  Serial.begin(115200);
+
   bool connected = true;
   xSemaphoreData = xSemaphoreCreateMutex();
   xSemaphoreTFT = xSemaphoreCreateMutex();
 
-  Serial.begin(115200);
 
   #if ENABLE_BME280
    bme280 = new Adafruit_BME280;
@@ -92,62 +94,82 @@ void setup() {
   }
 
 void loop(void) {
-  static uint32_t durPul;
-  int nPrev;    
+  static uint32_t durPul=0;
+  Weather* currentData;
+  uint32_t currentDatadt;
+  int nPrev;  
 
   // Wait for data 
   for(;!Location->isValidData();){
-    taskYIELD();
+    tft.printf("Update data...\r\n");
+    delay(1000);
     }
-  
-  
-  
+  currentData = Location->getCurrentData();
+  currentDatadt = currentData->dt;
+
+
   while(true){
-    tft.resume();
-    if(!OTAExt.getUpload()){ 
-      tft.printCurrent(Location->getCurrentData(),true,nullptr);
-      }
-    tft.resume();
-    while(!button.getPulsacion(&durPul)){
-      if(!OTAExt.getUpload() && Location->isValidData()){ 
-        tft.printCurrent(Location->getCurrentData(),false,nullptr);
+    tft.printCurrent(currentData,true,nullptr);    
+    tft.resume();                                 
+    log_d("Current data screen.\r\n");
+    while(xQueueReceive(button.getQueue(),&durPul,1) != pdPASS){    
+      if(currentDatadt != currentData->dt){
+        tft.printCurrent(currentData,true,nullptr);   
+        Serial.printf("Actualizando datos");
+        currentDatadt = currentData->dt;
         }
+      vPortYield();
       }
 
-    #if ENABLE_BME280      
-    while(!button.getPulsacion(&durPul)){
-      if(!OTAExt.getUpload() && Location->isValidData()){ 
-        tft.printCurrent(Location->getCurrentData(),false,bme280);
-        }
+
+    #if ENABLE_BME280
+      log_d("Current data and local temperature display\r\n");
+      tft.printCurrent(currentData,false,bme280);    
+      while(xQueueReceive(button.getQueue(),&durPul,1) != pdPASS){    
+        if(currentDatadt != currentData->dt){
+          tft.printCurrent(currentData,false,bme280);
+          currentDatadt = currentData->dt;
+          }
+        vPortYield();
       }
     #endif
-    delay(100);
+
+    log_d("Air quality display");
+    
     tft.suspend();
-    if(!OTAExt.getUpload() && Location->isValidData()) tft.printAirQuality(Location->getPollution(),true);
-    while(!button.getPulsacion(&durPul)){
-      if(!OTAExt.getUpload() && Location->isValidData()) tft.printAirQuality(Location->getPollution(),false);
-      }
-
-    if(!OTAExt.getUpload()) tft.printWeatherData(Location->getCurrentData(),true);
-    while(!button.getPulsacion(&durPul)){
-      if(Location->isValidData()){
-        if(!OTAExt.getUpload()) tft.printWeatherData(Location->getCurrentData(),false);
-        }
-      }
-    if(durPul>500){
-      nPrev = 0;
-      while(true){
-        if(!OTAExt.getUpload()) 
-          if(!tft.printForecast(Location,true,nPrev++)){
-            nPrev = 0;
-            break;
-            }
-        while(!button.getPulsacion());
+    tft.printAirQuality(Location->getPollution(),true);     //sCREEN2
+    while(xQueueReceive(button.getQueue(),&durPul,1) != pdPASS){    // while not push button
+        if(currentDatadt != currentData->dt){
+          tft.printAirQuality(Location->getPollution(),true);    // Print Screen2
+          currentDatadt = currentData->dt;
+          }
+        vPortYield();
         }
 
-      }
-  esp_task_wdt_reset();
-  }
-   
+    log_d("Current data screen, detail\r\n");
+    
+    tft.suspend();
+    tft.printWeatherData(Location->getCurrentData(),true);    //sCREEN3
+    while(xQueueReceive(button.getQueue(),&durPul,1) != pdPASS){    // while not push button
+        if(currentDatadt != currentData->dt){
+          tft.printWeatherData(Location->getCurrentData(),true);    // Print Screen2
+          currentDatadt = currentData->dt;
+          }
+        vPortYield();
+        }
+
+      if(durPul>500){
+        nPrev = 0;
+        while(true){
+            if(!tft.printForecast(Location,true,nPrev++)){
+              nPrev = 0;
+              break;
+              }
+            log_d("Forecast %d\r\n",nPrev);
+            while(xQueueReceive(button.getQueue(),&durPul,1) != pdTRUE)  vPortYield();
+          }
+        }
+    }
+ 
 }
 

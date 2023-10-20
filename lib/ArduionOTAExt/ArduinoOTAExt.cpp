@@ -1,5 +1,7 @@
 #include <ArduinoOTAExt.h>
 
+extern TaskHandle_t loopTaskHandle;
+
 ArduinoOTAExt::ArduinoOTAExt(Adafruit_ILI9341Ext& _tft,const char* _pass,const char* _nombre)   
   : TaskParent(OTATASK_NAME, OTATASK_HEAP,OTATASK_PRIORITY, OTATASK_CORE){
   tft = &_tft; 
@@ -24,22 +26,22 @@ void ArduinoOTAExt::initOTA(){
         else // U_SPIFFS
           type = "filesystem";
         setUpload();
+        vTaskSuspend(loopTaskHandle);
         tft->suspend();
-        delay(100);
         tft->fillScreen(ILI9341_BLACK);
         tft->setTextColor(ILI9341_YELLOW,ILI9341_BLACK);
         tft->setTextSize(3);
         tft->setCursor(0,0);
-        tft->println("Uploading");
+        tft->println("Downloading");
       })
     .onEnd([&]() {
-        // Reinicio por vencimiento del wdt, necesario para que reinicie al finalizar el upload
+        // reset due to task watchdog expiration
         esp_task_wdt_init(1, true);
         esp_task_wdt_add(NULL);
         while(true);  
       })
     .onProgress([&](unsigned int progress, unsigned int total) {
-        esp_task_wdt_reset();     // Para que no temporize el TWDT
+        esp_task_wdt_reset();     
         tft->setTextSize(5);
         tft->setCursor(75,100);
         tft->printf("%u%%\r", (progress / (total / 100)));
@@ -62,7 +64,7 @@ void ArduinoOTAExt::initOTA(){
       });
 
     if (!MDNS.begin(nombre)) {
-        Serial.println("Error setting up MDNS responder!");
+        log_e("Error setting up MDNS responder!");
     }
  
     ArduinoOTA.setMdnsEnabled(true);
