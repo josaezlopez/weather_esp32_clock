@@ -232,13 +232,13 @@ bool OpenWeatherMap::dlForecastData(){
         
         strcpy(item.pod, list_item["sys"]["pod"]); 
         strcpy(item.dt_txt, list_item["dt_txt"]); 
-        // Nombre del dia
+        // Name od day
         strptime(item.dt_txt,"%Y-%m-%d %H:%M:%S", &tm);
-        strcpy(item.nombreDia,timeClient->getNameOfDay(tm.tm_wday));  
-        /* Solo la hora*/ 
-
+        strcpy(item.dayName,timeClient->getNameOfDay(tm.tm_wday));  
+ 
+        /* only hour*/ 
         String sdt_txt = String(item.dt_txt);
-        strcpy(item.hora,sdt_txt.substring(11,16).c_str());  
+        strcpy(item.hour,sdt_txt.substring(11,16).c_str());  
     
         foreCastList.push_back(item);
         }
@@ -346,49 +346,49 @@ bool  OpenWeatherMap::dlPollutionData(){
 // Viento del noroeste: Mistral (NW): de 292,5° a 337,5°
 
 void OpenWeatherMap::getNameWind(float deg,wind* wind){
-    int indice = 0;
+    int index = 0;
     int m=0;
     if(strcmp("ES",setting.lang)==0)
         m=0;
     else
         m=1;
     if(deg<0 || deg>=360){
-        indice = -1;
+        index = -1;
         }
     if((deg >= 0 && deg<=22.5) || (deg>=337.5 && deg<=359)){
-        indice =0;
+        index =0;
     }
     if(deg>=22.5 && deg<= 67.5){
-        indice =1;
+        index =1;
     }
     if(deg>=67.5 && deg<= 112.5){
-        indice =2;
+        index =2;
     }
     if(deg>=112.5 && deg<= 157.5){
-        indice =3;
+        index =3;
     }
     if(deg>=157.5 && deg<= 202.5){
-        indice =4;
+        index =4;
     }
     if(deg>=202.5 && deg<= 247.5){
-        indice =5;
+        index =5;
     }
     if(deg>=247.5 && deg<= 292.5){
-        indice =6;
+        index =6;
     }
     if(deg>=292.5 && deg<= 337.5){
-        indice =7;
+        index =7;
     }
 
-    if(indice == -1){
-        strcpy(wind->NombreViento,"");
+    if(index == -1){
+        strcpy(wind->nameOfWind,"");
         strcpy(wind->pcAbv,"");
-        strcpy(wind->dirViento,"");
+        strcpy(wind->directionOfWind,"");
 
     }
     else{
-        strcpy(wind->NombreViento,nombreViento[indice]);
-        strcpy(wind->pcAbv,pcAbv[indice]);
-        strcpy(wind->dirViento,dirViento[m][indice]);
+        strcpy(wind->nameOfWind,nameWind[index]);
+        strcpy(wind->pcAbv,pcAbv[index]);
+        strcpy(wind->directionOfWind,dirWind[m][index]);
     }
 }

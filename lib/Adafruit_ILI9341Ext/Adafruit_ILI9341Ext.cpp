@@ -39,12 +39,12 @@ void Adafruit_ILI9341Ext::loop(){
 
 
 
-void Adafruit_ILI9341Ext::clear(uint16_t c=ILI9341_BLACK){
+void Adafruit_ILI9341Ext::clear(uint16_t backgroundColor=ILI9341_BLACK){
   if(!SPIFFS.begin()){
     log_e("SPIFFS initialisation failed!\r\n");
     while (true);
     }
-  fillScreen(c);
+  fillScreen(backgroundColor);
 }
 
 void Adafruit_ILI9341Ext::begin(){
@@ -54,7 +54,7 @@ void Adafruit_ILI9341Ext::begin(){
 }
 
 // Vertical print
-void Adafruit_ILI9341Ext::printV(const char *str,uint16_t color,uint16_t colorFondo,uint16_t colorBorde,bool force){
+void Adafruit_ILI9341Ext::printV(const char *str,uint16_t color,uint16_t backgroundColor,uint16_t borderColor,bool force){
   static char name[50];
 
   int16_t x1,y1;
@@ -65,8 +65,8 @@ void Adafruit_ILI9341Ext::printV(const char *str,uint16_t color,uint16_t colorFo
   }
   
   if(strlen(str)>9) textSize = 2;
-  fillRoundRect(0,0,35,320,5,colorFondo);
-  drawRoundRect(0,0,35,320,5,colorBorde);
+  fillRoundRect(0,0,35,320,5,backgroundColor);
+  drawRoundRect(0,0,35,320,5,borderColor);
   cx+=6;
   cy+=10;
 
@@ -86,19 +86,19 @@ void Adafruit_ILI9341Ext::printV(const char *str,uint16_t color,uint16_t colorFo
 }
 
 // Data screen
-void Adafruit_ILI9341Ext::printWeatherData(Weather* currentData,bool borrar=true){
+void Adafruit_ILI9341Ext::printWeatherData(Weather* currentData,bool clear=true){
 
   int incremento = 20;
   uint16_t colorTit = ILI9341_BLUE;
   uint16_t colorDatos = ILI9341_GREEN;
-  uint16_t colorFondo = ILI9341_BLACK;
+  uint16_t backgroundColor = ILI9341_BLACK;
 
   while(xSemaphoreTake(xSemaphoreTFT,(TickType_t) 1) != pdTRUE){ 
     delay(1000);
     }
 
-  if(borrar){
-    fillScreen(colorFondo);
+  if(clear){
+    fillScreen(backgroundColor);
     setTextSize(2);
     printV(currentData->name,ILI9341_WHITE,ILI9341_DARKGREY,ILI9341_CYAN);
     }
@@ -110,13 +110,13 @@ void Adafruit_ILI9341Ext::printWeatherData(Weather* currentData,bool borrar=true
 
   setTextSize(2);
   setCursor(50,0);
-  setTextColor(colorTit,colorFondo);
+  setTextColor(colorTit,backgroundColor);
   println(text_temperatura[0][getNumLang()]);
 
 
 
   setTextSize(3);
-  setTextColor(colorDatos,colorFondo);
+  setTextColor(colorDatos,backgroundColor);
   setCursor(50,incremento);
   printf(" % 2.1f %s",temp,setting.unitTemp);      
     
@@ -126,12 +126,12 @@ void Adafruit_ILI9341Ext::printWeatherData(Weather* currentData,bool borrar=true
     temp = temp * (9/5) + 32;
   }
   
-  setTextColor(colorTit,colorFondo);
+  setTextColor(colorTit,backgroundColor);
   setTextSize(2);
   setCursor(50,25+incremento);
   println(text_maxima[0][getNumLang()]);
   setTextSize(3);
-  setTextColor(colorDatos,colorFondo);
+  setTextColor(colorDatos,backgroundColor);
   setCursor(50,25+incremento*2);
   printf(" % 2.1f %s",temp,setting.unitTemp);      
   
@@ -143,13 +143,13 @@ void Adafruit_ILI9341Ext::printWeatherData(Weather* currentData,bool borrar=true
 
 
 
-  setTextColor(colorTit,colorFondo);
+  setTextColor(colorTit,backgroundColor);
   setTextSize(2);
   setCursor(50,30+incremento*3);
   println(text_minima[0][getNumLang()]);
   setTextSize(3);
   setCursor(50,50+incremento*3);
-  setTextColor(colorDatos,colorFondo);
+  setTextColor(colorDatos,backgroundColor);
   printf(" % 2.1f %s",temp,setting.unitTemp);      
   
 
@@ -159,45 +159,45 @@ void Adafruit_ILI9341Ext::printWeatherData(Weather* currentData,bool borrar=true
     temp = temp * (9/5) + 32;
   }
 
-  setTextColor(colorTit,colorFondo);
+  setTextColor(colorTit,backgroundColor);
   setTextSize(2);
   setCursor(50,55+incremento*4);
   println(text_stermica[0][getNumLang()]);
   setTextSize(3);
   setCursor(50,75+incremento*4);
-  setTextColor(colorDatos,colorFondo);
+  setTextColor(colorDatos,backgroundColor);
   printf(" % 2.1f %s",temp,setting.unitTemp);      
   
 
 
   // Humedity
-  setTextColor(colorTit,colorFondo);
+  setTextColor(colorTit,backgroundColor);
   setTextSize(2);
   setCursor(50,55+25+incremento*5);
   println(text_humedad[0][getNumLang()]);
   setTextSize(3);
   setCursor(50,100+incremento*5);
-  setTextColor(colorDatos,colorFondo);
+  setTextColor(colorDatos,backgroundColor);
   printf(" % 2d ",currentData->_weather_main.humidity);      
      
 
   // Pressure
-  setTextColor(colorTit,colorFondo);
+  setTextColor(colorTit,backgroundColor);
   setTextSize(2);
   setCursor(50,55+25+25+incremento*6);
   println(text_presion[0][getNumLang()]);
   setTextSize(3);
   setCursor(50,125+incremento*6);
-  setTextColor(colorDatos,colorFondo);
+  setTextColor(colorDatos,backgroundColor);
   printf(" % 4d hPa",currentData->_weather_main.pressure);      
 
   setTextSize(1);
-  setTextColor(ILI9341_CYAN,colorFondo);
+  setTextColor(ILI9341_CYAN,backgroundColor);
   setCursor(50,275);
   if(getNumLang()==0)
-    printf("%s (%s) %2.1fm/s",currentData->_wind.dirViento,currentData->_wind.NombreViento,currentData->_wind.speed);
+    printf("%s (%s) %2.1fm/s",currentData->_wind.directionOfWind,currentData->_wind.nameOfWind,currentData->_wind.speed);
   else
-    printf("%s wind %2.1fm/s",currentData->_wind.dirViento,currentData->_wind.speed);
+    printf("%s wind %2.1fm/s",currentData->_wind.directionOfWind,currentData->_wind.speed);
   
 
   setTextSize(2);
@@ -208,12 +208,12 @@ void Adafruit_ILI9341Ext::printWeatherData(Weather* currentData,bool borrar=true
 }
 
 // Print clock
-void Adafruit_ILI9341Ext::printTime(int x,int y,uint16_t colorFecha,uint16_t colorReloj,uint16_t colorFondo){
+void Adafruit_ILI9341Ext::printTime(int x,int y,uint16_t dateColor,uint16_t clockColor,uint16_t backgroundColor){
  
   fillRoundRect(x,y,190,5,5,ILI9341_CYAN);
   
   setTextSize(2);
-  setTextColor(colorFecha,colorFondo);
+  setTextColor(dateColor,backgroundColor);
   setCursor(x+25,y+10);
  
   printf("%d %s %d",
@@ -224,7 +224,7 @@ void Adafruit_ILI9341Ext::printTime(int x,int y,uint16_t colorFecha,uint16_t col
   timeClient->getEpochTime();
   setTextSize(6);
   setCursor(x,y+33);
-  setTextColor(colorReloj,colorFondo);
+  setTextColor(clockColor,backgroundColor);
   printf("%02d:%02d",timeClient->getHours(),timeClient->getMinutes());
   setTextSize(3);
   setCursor(x+140,y+83);
@@ -235,42 +235,42 @@ void Adafruit_ILI9341Ext::printTime(int x,int y,uint16_t colorFecha,uint16_t col
   }
 
 // Wind
-void Adafruit_ILI9341Ext::printWind(int x,int y,Weather* currentData,uint16_t colorTexto,uint16_t colorFondo){
+void Adafruit_ILI9341Ext::printWind(int x,int y,Weather* currentData,uint16_t textColor,uint16_t backgroundColor){
   char buf[25];
 
   setTextSize(2);
-  setTextColor(colorTexto,colorFondo);
+  setTextColor(textColor,backgroundColor);
   setCursor(x,y);
   if(!getNumLang())
-    sprintf(buf,"%s %s",currentData->_wind.pcAbv,currentData->_wind.NombreViento);
+    sprintf(buf,"%s %s",currentData->_wind.pcAbv,currentData->_wind.nameOfWind);
   else
-    sprintf(buf,"%s wind",currentData->_wind.dirViento);
-  printFillRight(buf,15,colorTexto,colorFondo);
+    sprintf(buf,"%s wind",currentData->_wind.directionOfWind);
+  printFillRight(buf,15,textColor,backgroundColor);
   setCursor(x,y+15);
   sprintf(buf,"%2.1f m/s",currentData->_wind.speed);
-  printFillRight(buf,15,colorTexto,colorFondo);
+  printFillRight(buf,15,textColor,backgroundColor);
 
   }
 
 // Sun 
-void Adafruit_ILI9341Ext::printSun(int x,int y,Weather* currentData, uint16_t colorTexto,uint16_t colorDatos,uint16_t colorFondo){
+void Adafruit_ILI9341Ext::printSun(int x,int y,Weather* currentData, uint16_t textColor,uint16_t dataColor,uint16_t backgroundColor){
 
   // SunRise
-  setTextColor(ILI9341_WHITE,colorFondo);
+  setTextColor(ILI9341_WHITE,backgroundColor);
   setTextSize(2);
   setCursor(x,y);
   print(text_amanecer[0][getNumLang()]);
-  setTextColor(colorDatos,colorFondo);
+  setTextColor(dataColor,backgroundColor);
   struct tm* tmTemp;
   tmTemp = timeClient->epoch2tm(currentData->_sys.sunrise + currentData->_sys.timezone );
   printf(": %02d:%02d",tmTemp->tm_hour,tmTemp->tm_min);
 
   // Sunset
-  setTextColor(ILI9341_WHITE,colorFondo);
+  setTextColor(ILI9341_WHITE,backgroundColor);
   setTextSize(2);
   setCursor(x,y+18);
   print(text_anochecer[0][getNumLang()]);
-  setTextColor(colorDatos,colorFondo);
+  setTextColor(dataColor,backgroundColor);
   tmTemp = timeClient->epoch2tm(currentData->_sys.sunset + currentData->_sys.timezone );
   printf(": %02d:%02d",tmTemp->tm_hour,tmTemp->tm_min);
 }
@@ -279,9 +279,7 @@ void Adafruit_ILI9341Ext::printSun(int x,int y,Weather* currentData, uint16_t co
 // Main screen
 void Adafruit_ILI9341Ext::printCurrent(Weather* currentData,bool clear,Adafruit_BME280* _bme280=nullptr){
   
-  uint16_t colorDatos = ILI9341_GREEN;
-  uint16_t colorFondo = ILI9341_BLACK;
-
+  uint16_t backgroundColor = ILI9341_BLACK;
   bme280 = _bme280;
 
   if(xSemaphoreTake(xSemaphoreTFT,(TickType_t) 1)!=pdTRUE){ 
@@ -308,28 +306,28 @@ void Adafruit_ILI9341Ext::printCurrent(Weather* currentData,bool clear,Adafruit_
 // Print the temperature in current if bme280 != null the temperature is from bme280
 void Adafruit_ILI9341Ext::printTemp(Weather* currentData,int x,int y){
 
-  float temperatura;
-  int presion;
-  int humedad;
+  float temperature;
+  int pressure;
+  int humidity;
   char buffer[10];
 
 
   if(!bme280){
-    temperatura = currentData->_weather_main.temp + ZeroAbs;
+    temperature = currentData->_weather_main.temp + ZeroAbs;
     if(setting.unitTemp[0]=='F'){
-      temperatura = temperatura * (9/5) + 32;
+      temperature = temperature * (9/5) + 32;
     }
 
-    presion = currentData->_weather_main.pressure;
-    humedad = currentData->_weather_main.humidity;
+    pressure = currentData->_weather_main.pressure;
+    humidity = currentData->_weather_main.humidity;
     }
   else{
-    temperatura = bme280->readTemperature();
+    temperature = bme280->readTemperature();
     if(setting.unitTemp[0]=='F'){
-      temperatura = temperatura * (9/5) + 32;
+      temperature = temperature * (9/5) + 32;
     }
-    presion = bme280->readPressure()/100;
-    humedad = bme280->readHumidity();
+    pressure = bme280->readPressure()/100;
+    humidity = bme280->readHumidity();
   }
 
   setCursor(x,y+10);
@@ -351,7 +349,7 @@ void Adafruit_ILI9341Ext::printTemp(Weather* currentData,int x,int y){
   setCursor(x,y+20);
   setTextSize(3);
   setTextColor(ILI9341_GREEN,ILI9341_BLACK);
-  int t = round(temperatura);
+  int t = round(temperature);
   sprintf(buffer,"%d %s ",t,setting.unitTemp);
   printFillRight(buffer,5,ILI9341_GREEN,ILI9341_BLACK); 
 
@@ -359,14 +357,14 @@ void Adafruit_ILI9341Ext::printTemp(Weather* currentData,int x,int y){
   setCursor(x,y+45);
   setTextSize(2);
   setTextColor(ILI9341_GREEN,ILI9341_BLACK);
-  sprintf(buffer,"%d hPa",presion);
+  sprintf(buffer,"%d hPa",pressure);
   printFillRight(buffer,8,ILI9341_GREEN,ILI9341_BLACK);
   
   
   // Humidity
   setCursor(x,y+60);
   setTextSize(2);
-  sprintf(buffer,"Hum:%d%s",humedad,"%");
+  sprintf(buffer,"Hum:%d%s",humidity,"%");
   printFillRight(buffer,8,ILI9341_GREEN,ILI9341_BLACK);
 
 }
@@ -375,47 +373,47 @@ void Adafruit_ILI9341Ext::printTemp(Weather* currentData,int x,int y){
 bool Adafruit_ILI9341Ext::printForecast(OpenWeatherMap* Location,bool clear,int dia){
   std::list<foreCast> *forecastlist = Location->getForecastList();
 
-  char nombreDia[10];
+  char dayName[10];
   int nDias = 0;
   for (foreCast x : *forecastlist) {
-    if(strcmp(nombreDia, x.nombreDia)!=0){
+    if(strcmp(dayName, x.dayName)!=0){
       nDias++;
-      strcpy(nombreDia,x.nombreDia);
+      strcpy(dayName,x.dayName);
     }
 	}
   
   if(dia<0 || dia>nDias-1) return false;
-  int *PrevXDia = new int[nDias];
-  for(int n=0;n<nDias;n++) PrevXDia[n] = 0;
+  int *forecastDay = new int[nDias];
+  for(int n=0;n<nDias;n++) forecastDay[n] = 0;
 
   int n=0;
-  strcpy(nombreDia,forecastlist->begin()->nombreDia);
+  strcpy(dayName,forecastlist->begin()->dayName);
   for (foreCast x : *forecastlist) { 
-    if(strcmp(nombreDia, x.nombreDia)==0){
-      PrevXDia[n]++;
+    if(strcmp(dayName, x.dayName)==0){
+      forecastDay[n]++;
     }
     else{
       n++;
     }
-    strcpy(nombreDia,x.nombreDia);
+    strcpy(dayName,x.dayName);
   }
   
   for(int n=0;n<nDias;n++){
     if(n!=0)
-      PrevXDia[n]++;
+      forecastDay[n]++;
   }
 
   for(int n=0;n<nDias;n++){
-    PrevXDia[n]++;
+    forecastDay[n]++;
   }
 
-  int incremento = 40;
-  uint16_t colorDatos = ILI9341_WHITE;
-  uint16_t colorFondo = ILI9341_BLACK;
+  int increase = 40;
+  uint16_t dataColor = ILI9341_WHITE;
+  uint16_t backgroundColor = ILI9341_BLACK;
 
   int saltar = 0;
   for(int n=0 ; n<dia; n++){
-    saltar += PrevXDia[n]-1;
+    saltar += forecastDay[n]-1;
   }
 
 
@@ -427,42 +425,41 @@ bool Adafruit_ILI9341Ext::printForecast(OpenWeatherMap* Location,bool clear,int 
   }
 
   if(clear){
-    fillScreen(colorFondo);
+    fillScreen(backgroundColor);
     setTextSize(2);
-    printV(it->nombreDia,ILI9341_WHITE,ILI9341_DARKGREY,ILI9341_CYAN);
+    printV(it->dayName,ILI9341_WHITE,ILI9341_DARKGREY,ILI9341_CYAN);
     }
 
-  for(int n=0;n<PrevXDia[dia]-1 ; n++){
-    setTextColor(colorDatos,colorFondo);
+  for(int n=0;n<forecastDay[dia]-1 ; n++){
+    setTextColor(dataColor,backgroundColor);
     setTextSize(2);
-    setCursor(50,n*incremento);
-    setTextColor(ILI9341_GREEN,colorFondo);
+    setCursor(50,n*increase);
+    setTextColor(ILI9341_GREEN,backgroundColor);
     temp = it->_SWeather_main.temp +ZeroAbs;
     if(setting.unitTemp[0]=='F'){
       temp = temp * (9/5) + 32;
     }
 
-    printf("%s %0.f%s %0.f%s",it->hora,temp,setting.unitTemp,it->pop*100.0,"%");
-    setCursor(50,n*incremento+15);
-    setTextColor(ILI9341_WHITE,colorFondo);
+    printf("%s %0.f%s %0.f%s",it->hour,temp,setting.unitTemp,it->pop*100.0,"%");
+    setCursor(50,n*increase+15);
+    setTextColor(ILI9341_WHITE,backgroundColor);
     printUntil(it->_Sweather.description,15);
-    drawFastHLine(50,n*incremento+33,200,ILI9341_YELLOW);
+    drawFastHLine(50,n*increase+33,200,ILI9341_YELLOW);
     it++;
     }
 
 
-  delete PrevXDia;
+  delete forecastDay;
   return true;
 
 }
 
 // Air quality display
-void Adafruit_ILI9341Ext::printAirQuality(polucion* pollution,bool borrar=true){
+void Adafruit_ILI9341Ext::printAirQuality(polucion* pollution,bool clear=true){
 
-  uint16_t colorDatos = ILI9341_BLUE;
-  uint16_t colorFondo = ILI9341_BLACK;
+  uint16_t backgroundColor = ILI9341_BLACK;
   int yPos = 0;
-  int incremento = 20;
+  int increase = 20;
 
 
   if(xSemaphoreTake(xSemaphoreTFT,(TickType_t) 1)!=pdTRUE){ 
@@ -470,8 +467,8 @@ void Adafruit_ILI9341Ext::printAirQuality(polucion* pollution,bool borrar=true){
   }
 
 
-  if(borrar){
-    fillScreen(colorFondo);
+  if(clear){
+    fillScreen(backgroundColor);
     setTextSize(2);
     printV(text_aire[0][getNumLang()],ILI9341_WHITE,ILI9341_DARKGREY,ILI9341_CYAN);
     }
@@ -479,12 +476,12 @@ void Adafruit_ILI9341Ext::printAirQuality(polucion* pollution,bool borrar=true){
   
   // Air quality classification
   setTextSize(3);
-  setTextColor(colorPollution(pollution->n_aqi),colorFondo);
+  setTextColor(colorPollution(pollution->n_aqi),backgroundColor);
   setCursor(50,yPos);
   printf("%s", pollution->aqi);      
     
   // Carbon monoxide
-  setTextColor(ILI9341_WHITE,colorFondo);
+  setTextColor(ILI9341_WHITE,backgroundColor);
   setTextSize(2);
   yPos+=50;
   setCursor(50,yPos);
@@ -492,52 +489,52 @@ void Adafruit_ILI9341Ext::printAirQuality(polucion* pollution,bool borrar=true){
 
 
   // Nitrogen oxides
-  setTextColor(ILI9341_WHITE,colorFondo);
-  yPos+=incremento;
+  setTextColor(ILI9341_WHITE,backgroundColor);
+  yPos+=increase;
   setCursor(50,yPos);
   printf("NO:    %2.1f",pollution->no);
 
   // Nitrogen dioxide
-  setTextColor(ILI9341_WHITE,colorFondo);
-  yPos+=incremento;
+  setTextColor(ILI9341_WHITE,backgroundColor);
+  yPos+=increase;
   setCursor(50,yPos);
   printf("NO2:   %2.1f",pollution->no2);
 
 
   // Ozone
-  yPos+=incremento;
+  yPos+=increase;
   setCursor(50,yPos);
-  setTextColor(ILI9341_WHITE,colorFondo);
+  setTextColor(ILI9341_WHITE,backgroundColor);
   printf("O3:    %2.1f",pollution->o3);      
      
   // Ammonia
-  yPos+=incremento;
+  yPos+=increase;
   setCursor(50,yPos);
-  setTextColor(ILI9341_WHITE,colorFondo);
+  setTextColor(ILI9341_WHITE,backgroundColor);
   printf("NH3:   %2.1f",pollution->nh3);      
 
   // Sulfur dioxide
-  yPos+=incremento;
+  yPos+=increase;
   setCursor(50,yPos);
-  setTextColor(ILI9341_WHITE,colorFondo);
+  setTextColor(ILI9341_WHITE,backgroundColor);
   printf("SO2:   %2.1f",pollution->so2); 
 
   // Particles diameter 2.5uM
-  yPos+=incremento;
+  yPos+=increase;
   setCursor(50,yPos);
-  setTextColor(ILI9341_WHITE,colorFondo);
+  setTextColor(ILI9341_WHITE,backgroundColor);
   printf("PM2-5: %2.1f",pollution->pm2_5); 
 
   // Particle diameter 10uM
-  yPos+=incremento;
+  yPos+=increase;
   setCursor(50,yPos);
-  setTextColor(ILI9341_WHITE,colorFondo);
+  setTextColor(ILI9341_WHITE,backgroundColor);
   printf("PM10:  %2.1f",pollution->pm10); 
 
   // Units
-  yPos+=incremento*2;
+  yPos+=increase*2;
   setCursor(50,yPos);
-  setTextColor(ILI9341_WHITE,colorFondo);
+  setTextColor(ILI9341_WHITE,backgroundColor);
   printf(text_unidades[0][getNumLang()]); 
   xSemaphoreGive(xSemaphoreTFT);
 }

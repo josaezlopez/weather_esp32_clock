@@ -31,6 +31,7 @@ Adafruit_ILI9341Ext tft = Adafruit_ILI9341Ext();  // Start screen task
 OpenWeatherMap* Location;
 touchEsp32 button(BUTTON_PIN);                    // Start button task
 ArduinoOTAExt OTAExt(tft,PASSOTA,STR(mDNSName));  // Start OTA and  MDNS task
+
 conf setting;
 
 
@@ -53,12 +54,12 @@ void setup() {
 
   WiFi.begin(setting.ssid,setting.password);
   tft.print("Connecting");
-  int contadorConexion = 0;
+  int connectionAttempts = 0;
   while(WiFi.status() != WL_CONNECTED) {
     delay(1000);
     tft.print(".");
-    contadorConexion++;
-    if(contadorConexion > 30){
+    connectionAttempts++;
+    if(connectionAttempts > 30){
       connected = false;
       break;
       }
@@ -70,7 +71,6 @@ void setup() {
     HALT;
     }
 
-
   tft.printf("ok\r\n");
   tft.setTextSize(1);
   tft.printf("http://%s.local\r\n", STR(mDNSName));
@@ -80,7 +80,7 @@ void setup() {
   
   
   // Start WEB server task
-  httpServer = new WebServerExt(80);
+  httpServer = new WebServerExt(WEBSERVER_PORT);
   
   // Start the NTP client task
   timeClient = new NTPClientExt(NTPSERVER,setting.timeZone,UPDATENTP,setting.dayligthSaving);
@@ -90,8 +90,9 @@ void setup() {
   Location = new OpenWeatherMap();
   }
 
+
 void loop(void) {
-  static uint32_t durPul=0;
+  static uint32_t pressDuration = 0;
   Weather* currentData;
   uint32_t currentDatadt;
   int nPrev;  
@@ -110,7 +111,7 @@ void loop(void) {
     tft.resume();                                 
 
     log_d("Current data screen.\r\n");
-    while(xQueueReceive(button.getQueue(),&durPul,1) != pdPASS){    
+    while(xQueueReceive(button.getQueue(),&pressDuration,1) != pdPASS){    
       if(currentDatadt != currentData->dt){
         tft.printCurrent(currentData,true,nullptr);   
         Serial.printf("Actualizando datos");
@@ -123,7 +124,7 @@ void loop(void) {
     #if ENABLE_BME280
       log_d("Current data and local temperature display\r\n");
       tft.printCurrent(currentData,false,bme280);    
-      while(xQueueReceive(button.getQueue(),&durPul,1) != pdPASS){    
+      while(xQueueReceive(button.getQueue(),&pressDuration,1) != pdPASS){    
         if(currentDatadt != currentData->dt){
           tft.printCurrent(currentData,false,bme280);
           currentDatadt = currentData->dt;
@@ -139,7 +140,7 @@ void loop(void) {
     xSemaphoreGive(xSemaphoreTFT);
     
     tft.printAirQuality(Location->getPollution(),true);     //sCREEN2
-    while(xQueueReceive(button.getQueue(),&durPul,1) != pdPASS){    // while not push button
+    while(xQueueReceive(button.getQueue(),&pressDuration,1) != pdPASS){    // while not push button
         if(currentDatadt != currentData->dt){
           tft.printAirQuality(Location->getPollution(),true);    // Print Screen2
           currentDatadt = currentData->dt;
@@ -151,7 +152,7 @@ void loop(void) {
     
     tft.suspend();
     tft.printWeatherData(Location->getCurrentData(),true);    //sCREEN3
-    while(xQueueReceive(button.getQueue(),&durPul,1) != pdPASS){    // while not push button
+    while(xQueueReceive(button.getQueue(),&pressDuration,1) != pdPASS){    // while not push button
         if(currentDatadt != currentData->dt){
           tft.printWeatherData(Location->getCurrentData(),true);    // Print Screen2
           currentDatadt = currentData->dt;
@@ -159,7 +160,7 @@ void loop(void) {
         vPortYield();
         }
 
-      if(durPul>500){
+      if(pressDuration > 500){
         nPrev = 0;
         while(true){
             if(!tft.printForecast(Location,true,nPrev++)){
@@ -167,7 +168,7 @@ void loop(void) {
               break;
               }
             log_d("Forecast %d\r\n",nPrev);
-            while(xQueueReceive(button.getQueue(),&durPul,1) != pdTRUE)  vPortYield();
+            while(xQueueReceive(button.getQueue(),&pressDuration,1) != pdTRUE)  vPortYield();
           }
         }
     }

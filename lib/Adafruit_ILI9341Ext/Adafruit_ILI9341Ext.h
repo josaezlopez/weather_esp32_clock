@@ -29,19 +29,19 @@ class Adafruit_ILI9341Ext : public Adafruit_ILI9341, public TaskParent {
         {
         }
         void printCurrent(Weather* CurrentData,bool clear,Adafruit_BME280* bme280);
-        void printAirQuality(polucion* pollution,bool borrar);
-        void printWeatherData(Weather* currentData,bool borrar);
+        void printAirQuality(polucion* pollution,bool clear);
+        void printWeatherData(Weather* currentData,bool clear);
         bool printForecast(OpenWeatherMap* Location,bool clear,int dia);
         void begin();
-        void clear(uint16_t c);
+        void clear(uint16_t backgroundColor);
 
 
     protected:
         void printUntil(char* cad,int nCars);
-        void printV(const char *str,uint16_t color,uint16_t colorFondo,uint16_t colorBorde,bool force = false);
-        void printTime(int x,int y,uint16_t colorFecha,uint16_t colorReloj,uint16_t colorFondo);
-        void printWind(int x,int y,Weather* currentData,uint16_t colorTexto,uint16_t colorFondo);
-        void printSun(int x,int y,Weather* currentData,uint16_t colorTexto,uint16_t colorDatos,uint16_t colorFondo);
+        void printV(const char *str,uint16_t color,uint16_t backgroundColor,uint16_t colorBorde,bool force = false);
+        void printTime(int x,int y,uint16_t colorFecha,uint16_t colorReloj,uint16_t backgroundColor);
+        void printWind(int x,int y,Weather* currentData,uint16_t textColor,uint16_t backgroundColor);
+        void printSun(int x,int y,Weather* currentData,uint16_t textColor,uint16_t colorDatos,uint16_t backgroundColor);
         void printTemp(Weather* currentData,int  x,int y);
         void printIcon(Weather* currentData,int x,int y,bool force = false);
         void loop();

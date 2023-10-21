@@ -195,25 +195,25 @@ void update(){
     int  startDS = String(httpServer->arg("startds")).toInt();
     int  endDS = String(httpServer->arg("endds")).toInt();
 
-    int nComas = 0;
-    int nPuntos = 0;
+    int nComma = 0;
+    int nPeriod = 0;
 
     for(int n = 0; n < coordText.length(); n++){
         if(coordText.charAt(n)=='.'){
-            nPuntos++;
+            nPeriod++;
         }
         if(coordText.charAt(n)==','){
-            nComas++;
+            nPeriod++;
         }
     }
 
-    if(nComas==0 || nComas==2 || nComas >3){
+    if(nComma==0 || nComma==2 || nComma >3){
         httpServer->send(200,"text/html",String("Invalid coordinates."));
         return;
         }
 
     int c,c1,c2,c3;
-    if(nComas==3){
+    if(nComma==3){
         c1 = coordText.indexOf(',');        // c1 = pos primera coma
         c2 = coordText.indexOf(',',c1+1);   // c2 = pos segunda coma
         c3 = coordText.indexOf(',',c2+1);   // c3 = pos tercera coma

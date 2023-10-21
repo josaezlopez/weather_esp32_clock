@@ -12,18 +12,15 @@
 #define WEATHERTASK_PRIORITY    TaskParent::th_LOWEST_PRIORITY
 #define WEATHERTASK_CORE    0
 
+#define ZeroAbs -273.15
+#define UrlCurrentData  "http://api.openweathermap.org/data/2.5/weather?lat=%f&lon=%f&appid=%s&lang=%s"
+#define UrlForecastData "https://api.openweathermap.org/data/2.5/forecast?lat=%f&lon=%f&appid=%s&lang=%s"
+#define UrlPollution    "http://api.openweathermap.org/data/2.5/air_pollution?lat=%f&lon=%f&appid=%s"
 
 struct weatherId{
     char main[50];
     char descripcion[20];
 };
-
-const float ZeroAbs = -273.15;
-
-
-#define UrlCurrentData  "http://api.openweathermap.org/data/2.5/weather?lat=%f&lon=%f&appid=%s&lang=%s"
-#define UrlForecastData "https://api.openweathermap.org/data/2.5/forecast?lat=%f&lon=%f&appid=%s&lang=%s"
-#define UrlPollution    "http://api.openweathermap.org/data/2.5/air_pollution?lat=%f&lon=%f&appid=%s"
 
 struct coord{
    double lat;
@@ -70,8 +67,8 @@ struct wind{
     int deg;
     float gust;
     int visibility;
-    char dirViento[12];
-    char NombreViento[12];
+    char directionOfWind[12];
+    char nameOfWind[12];
     char pcAbv[3];
 };
 
@@ -115,8 +112,8 @@ struct foreCast{
     clouds _Sclouds;
     char pod[3];
     char dt_txt[20];
-    char nombreDia[10];
-    char hora[6];
+    char dayName[10];
+    char hour[6];
     float pop;
 };
 
@@ -185,9 +182,9 @@ class OpenWeatherMap : public  TaskParent{
       uint32_t lastUpdate;
 
       const char pcAbv[8][3] = {"N ","NE","E ","SE","S ","SO","O ","NO"};
-      const char dirViento[2][8][10] = {"Norte","Noreste","Este","Sudeste","Sur","Sudoeste","Oeste","Noroeste",
+      const char dirWind[2][8][10] = {"Norte","Noreste","Este","Sudeste","Sur","Sudoeste","Oeste","Noroeste",
                                         "North","Northeast","East","Southeast","South","Southwest","West","Northwest"};
-      const char nombreViento[8][15] = {    "Tramontana ","Gregal     ","Levante    ","Siroco     ",
+      const char nameWind[8][15] = {    "Tramontana ","Gregal     ","Levante    ","Siroco     ",
                                             "Ostro      ","Garbino    ","Poniente   ","Mistral    "};
       const char aqiPollution[2][5][20] = {"Buena","Suficiente","Moderada","Mala","Muy mala",
                                            "Good","Fair","Moderate","Poor","Very poor"};

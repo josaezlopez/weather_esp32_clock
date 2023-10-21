@@ -2,11 +2,11 @@
 
 extern TaskHandle_t loopTaskHandle;
 
-ArduinoOTAExt::ArduinoOTAExt(Adafruit_ILI9341Ext& _tft,const char* _pass,const char* _nombre)   
+ArduinoOTAExt::ArduinoOTAExt(Adafruit_ILI9341Ext& _tft,const char* _password,const char* _name)   
   : TaskParent(OTATASK_NAME, OTATASK_HEAP,OTATASK_PRIORITY, OTATASK_CORE){
   tft = &_tft; 
-  strcpy(password,_pass);
-  strcpy(nombre,_nombre);
+  strcpy(password,_password);
+  strcpy(name,_name);
 }
 
 void ArduinoOTAExt::loop(){
@@ -63,13 +63,13 @@ void ArduinoOTAExt::initOTA(){
           if (error == OTA_END_ERROR) tft->print("End Failed");
       });
 
-    if (!MDNS.begin(nombre)) {
+    if (!MDNS.begin(name)) {
         log_e("Error setting up MDNS responder!");
     }
  
     ArduinoOTA.setMdnsEnabled(true);
     ArduinoOTA.setRebootOnSuccess(true);
     ArduinoOTA.setPassword(password);
-    ArduinoOTA.setHostname(nombre);
+    ArduinoOTA.setHostname(name);
     ArduinoOTA.begin();
 }

@@ -14,7 +14,7 @@
 class ArduinoOTAExt :  public TaskParent{
 
     public:
-        ArduinoOTAExt(Adafruit_ILI9341Ext& _tft,const char* _pass,const char* _nombre);
+        ArduinoOTAExt(Adafruit_ILI9341Ext& _tft,const char* _password,const char* __name);
         void loop();
         Adafruit_ILI9341Ext* tft;
         void setUpload() { upload = true;} 
@@ -23,7 +23,7 @@ class ArduinoOTAExt :  public TaskParent{
         void initOTA();
         bool upload = false;
         char password[11];
-        char nombre[15];
+        char name[15];
 
 };
 
