@@ -27,6 +27,8 @@
 #define DEFAULT_MONTH_END_DS    10                  // Default Daylight saving end month (last sunday of the month) 
 #define DEFAULT_DAYLIGTHSAVING  true                // Default True to enable daylight saving time, otherwise false
 
+// Webserver
+#define WEBSERVER_PORT	80
 //OTA
 #ifndef mDNSName
     #define mDNSName wstation
