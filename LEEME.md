@@ -41,11 +41,11 @@ Los iconos están en el directorio data. Hay que construir el sistema de fichero
 
 Antes de compilar modifique **conf.h** para poner el ssid password de su WIFI y la APIKEY de openweathermaps.
 Si no tiene instalado el sensor BME280 cambie la directiva **ENABLE_BME280** a false. 
-Se usa el apikey gratuito, desde aquí se puede conseguir el api key: https://openweathermap.org/price.
+Se usa el apikey gratuito, desde aquí se puede conseguir el apikey: https://openweathermap.org/price.
   
 Si se usa platformio se resolverán correctamente todas las dependencias de las librerías.
-platformio.ini viene configurado con dos entornos: release y release_ota. release_ota permite hacer el upload por wifi.
-Despues de compilar y enviar al esp32. Arrancará con la configuración por defecto, para cambiarla puede acceder a **https://wstation.local** 
+Existen dos entornos en platformio.ini: release y release_ota. release_ota permite programar el dispositivo por OTA.
+Despues de compilar y enviar al esp32. Arrancará con la configuración por defecto, para cambiarla puede acceder a **http://wstation.local** 
 Las coordenadas se pueden pegar desde google maps.
 
 ![Alt text](/images/web.png)
@@ -88,7 +88,7 @@ Pantalla numero 2:
     • PM 2-5 (partículas entre 2 y 5 uM
     • PM 10 (partículas de mas de 10uM
 
-Con una pulsación en el botón touch pasa a mostrar la calidad del aire:
+Con una pulsación en el botón touch pasa a mostrar los datos generales del tiempo.
 
 Pantalla numero 3:
 
