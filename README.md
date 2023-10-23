@@ -46,7 +46,7 @@ The free apikey is used, you can get the api key from here: https://openweatherm
 
 If platformio is used, all library dependencies will be resolved correctly.
 platformio.ini comes configured with two environments: release and release_ota. release_ota allows uploading via Wi-Fi.
-After compiling and sending to esp32 it will start with the default configuration, to change it you can access **https://wstation.local**  
+After compiling and sending to esp32 it will start with the default configuration, to change it you can access **http://wstation.local**  
 The coordinates can be pasted from Google Maps.
 
 ![Alt text](/images/web.png)
@@ -90,7 +90,8 @@ Screen number 2:
     • PM 2-5 (particles between 2 and 5 uM
     • PM 10 (particles larger than 10uM
 
-With a press on the touch button it starts showing the air quality:
+
+By pressing the touch button, it will display the weather general data.  
 
 Screen number 3:
 
@@ -104,7 +105,6 @@ Screen number 3:
     • Climate description.
 
 From this screen, a short press returns to Screen 1 and a long press shows the weather forecast for five days.
-
 
 Dependencies:
 
