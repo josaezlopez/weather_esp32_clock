@@ -45,7 +45,7 @@ Se usa el apikey gratuito, desde aquí se puede conseguir el apikey: https://ope
   
 Si se usa platformio se resolverán correctamente todas las dependencias de las librerías.
 Existen dos entornos en platformio.ini: release y release_ota. release_ota permite programar el dispositivo por OTA.
-Despues de compilar y enviar al esp32. Arrancará con la configuración por defecto, para cambiarla puede acceder a **http://wstation.local** 
+Después de compilar y enviar al esp32. Arrancará con la configuración por defecto, para cambiarla puede acceder a **http://wstation.local** 
 Las coordenadas se pueden pegar desde google maps.
 
 ![Alt text](/images/web.png)
