@@ -5,9 +5,6 @@
 #include <NTPClientExt.hpp>
 #include <Adafruit_ILI9341.h>
 #include <Weather.h>
-#include <FS.h>
-#include <SPIFFS.h>
-#include <SPIFFS_ImageReader.h>
 #include <Adafruit_BME280.h>
 #include <list>
 
@@ -34,6 +31,8 @@ class Adafruit_ILI9341Ext : public Adafruit_ILI9341, public TaskParent {
         bool printForecast(OpenWeatherMap* Location,bool clear,int dia);
         void begin();
         void clear(uint16_t backgroundColor);
+        void printIconPba(char* icono);
+
 
 
     protected:
@@ -50,7 +49,6 @@ class Adafruit_ILI9341Ext : public Adafruit_ILI9341, public TaskParent {
 
         Adafruit_BME280* bme280 = nullptr;
         char lastIcon[5];
-        SPIFFS_ImageReader reader;
         uint16_t colorPollution(int aqi);
         bool isBegin = false;
 

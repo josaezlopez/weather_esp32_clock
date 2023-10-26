@@ -10,6 +10,7 @@
 #include <funcaux.h>
 #include <conf.h>
 
+
 #define HALT while(true) taskYIELD()
 #define ST(A) #A
 #define STR(A) ST(A)
@@ -52,6 +53,8 @@ void setup() {
   setting = getConfig();
   tft.begin();
 
+
+
   WiFi.begin(setting.ssid,setting.password);
   tft.print("Connecting");
   int connectionAttempts = 0;
@@ -68,7 +71,6 @@ void setup() {
   if(!connected){
     tft.printf("\r\nNo connection to %s\r\n",setting.ssid);
     tft.printf("\r\nErase flash memory and recompile\r\n");
-    HALT;
     }
 
   tft.printf("ok\r\n");
@@ -88,6 +90,7 @@ void setup() {
   debugSettings();
   // Start the OpenWeatherMap task
   Location = new OpenWeatherMap();
+
   }
 
 

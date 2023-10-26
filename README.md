@@ -38,8 +38,6 @@ Weather station with desktop clock based on api.openweathermap.org and BME280 fo
 
   #### Preparing the SPIFFS file system
 
-The icons are in the data directory. You have to build the file system with what is in that directory and send it to esp32, to do this from the PlatformIO icon→ PROJECT TASK → release→ Platform **click in Erase flash, Build filesystem image y Upload filesystem image**.
-
 Before compiling, modify **conf.h** to set the ssid password of your WIFI and the openweathermaps APIKEY.
 If you do not have the BME280 sensor installed change the **ENABLE_BME280** directive to false.
 The free apikey is used, you can get the api key from here: https://openweathermap.org/price.

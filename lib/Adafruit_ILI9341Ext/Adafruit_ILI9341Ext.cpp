@@ -1,5 +1,8 @@
 #include <Adafruit_ILI9341Ext.h>
 #include <freertos/task.h>
+#include "icons.h"
+
+#define HALT while(true) taskYIELD()
 
 extern conf setting;
 extern SemaphoreHandle_t xSemaphoreData;
@@ -40,17 +43,15 @@ void Adafruit_ILI9341Ext::loop(){
 
 
 void Adafruit_ILI9341Ext::clear(uint16_t backgroundColor=ILI9341_BLACK){
-  if(!SPIFFS.begin()){
-    log_e("SPIFFS initialisation failed!\r\n");
-    while (true);
-    }
   fillScreen(backgroundColor);
 }
+
 
 void Adafruit_ILI9341Ext::begin(){
     Adafruit_ILI9341::begin();
     clear();
     isBegin=true;
+
 }
 
 // Vertical print
@@ -565,12 +566,19 @@ int Adafruit_ILI9341Ext::getNumLang(){
     return 1;
 }
 
-// Print icon
-void Adafruit_ILI9341Ext::printIcon(Weather* currentData,int x,int y,bool force){
+void Adafruit_ILI9341Ext::printIconPba(char* icono){
+  byte pixel[4];
+ 
 
-  char iconFile[16];
-  char* icon = currentData->_weather.icon;
-  if(strcmp(lastIcon,icon)==0 && !force){
+}
+
+
+// Print icon
+void Adafruit_ILI9341Ext::printIcon(Weather* currentData,int _x,int _y,bool force){
+  byte pixel[4];
+  char* icon;
+  char* iconWeather = currentData->_weather.icon;
+  if(strcmp(lastIcon,iconWeather)==0 && !force){
     return;
     } 
 
@@ -578,11 +586,51 @@ void Adafruit_ILI9341Ext::printIcon(Weather* currentData,int x,int y,bool force)
     delay(100);
     }
 
-  strcpy(iconFile,"/");
-  strcat(iconFile,icon);
-  strcat(iconFile,"@2x.bmp");
-  reader.drawBMP(iconFile,*this,x,y);
-  strcpy(lastIcon,icon);
+  if(strcmp(iconWeather,"01d")==0)
+    icon = icon_01d;
+  else if(strcmp(iconWeather,"01n")==0)
+    icon = icon_01n;
+  else if(strcmp(iconWeather,"02d")==0)
+    icon = icon_02d;
+  else if(strcmp(iconWeather,"02n")==0)
+    icon = icon_02n;
+  else if(strcmp(iconWeather,"03d")==0)
+    icon = icon_03d;
+  else if(strcmp(iconWeather,"03n")==0)
+    icon = icon_03n;
+  else if(strcmp(iconWeather,"04d")==0)
+    icon = icon_04d;
+  else if(strcmp(iconWeather,"04n")==0)
+    icon = icon_04n;
+  else if(strcmp(iconWeather,"09d")==0)
+    icon = icon_09d;
+  else if(strcmp(iconWeather,"09n")==0)
+    icon = icon_09n;
+  else if(strcmp(iconWeather,"10d")==0)
+    icon = icon_10d;
+  else if(strcmp(iconWeather,"10n")==0)
+    icon = icon_10n;
+  else if(strcmp(iconWeather,"11d")==0)
+    icon = icon_11d;
+  else if(strcmp(iconWeather,"11n")==0)
+    icon = icon_11n;
+  else if(strcmp(iconWeather,"13d")==0)
+    icon = icon_13d;
+  else if(strcmp(iconWeather,"13n")==0)
+    icon = icon_13n;
+  else if(strcmp(iconWeather,"50d")==0)
+    icon = icon_50d;
+  else if(strcmp(iconWeather,"50n")==0)
+    icon = icon_50n;
+
+  for(int y=_y; y < 100 +_y  ; y++){
+    for(int x=_x; x < 100 + _x ; x++){
+      HEADER_PIXEL(icon,pixel);
+      drawPixel(x,y,color565(pixel[0],pixel[1],pixel[2]));
+    }
+  }
+
+  strcpy(lastIcon,iconWeather);
   log_d("The icon is redrawn\r\n");
 
   xSemaphoreGive(xSemaphoreData);

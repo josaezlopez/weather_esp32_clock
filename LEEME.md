@@ -37,8 +37,6 @@ Estacion meteorológica con reloj de escritorio basada en api.openweathermap.org
 
   #### Preparación del sistema de ficheros SPIFFS
   
-Los iconos están en el directorio data. Hay que construir el sistema de ficheros con lo que hay en ese directorio y enviarlo al esp32, para ello desde el icono de PlatformIO→ PROJECT TASK → release→ Platform **pinchad en Erase flash, Build filesystem image y Upload filesystem image**.
-
 Antes de compilar modifique **conf.h** para poner el ssid password de su WIFI y la APIKEY de openweathermaps.
 Si no tiene instalado el sensor BME280 cambie la directiva **ENABLE_BME280** a false. 
 Se usa el apikey gratuito, desde aquí se puede conseguir el apikey: https://openweathermap.org/price.
