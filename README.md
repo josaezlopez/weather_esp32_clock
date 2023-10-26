@@ -36,8 +36,6 @@ Weather station with desktop clock based on api.openweathermap.org and BME280 fo
 
 ## Compilation:
 
-  #### Preparing the SPIFFS file system
-
 Before compiling, modify **conf.h** to set the ssid password of your WIFI and the openweathermaps APIKEY.
 If you do not have the BME280 sensor installed change the **ENABLE_BME280** directive to false.
 The free apikey is used, you can get the api key from here: https://openweathermap.org/price.
