@@ -462,7 +462,6 @@ void Adafruit_ILI9341Ext::printAirQuality(polucion* pollution,bool clear=true){
   int yPos = 0;
   int increase = 20;
 
-
   if(xSemaphoreTake(xSemaphoreTFT,(TickType_t) 1)!=pdTRUE){ 
     return;
   }
@@ -541,16 +540,17 @@ void Adafruit_ILI9341Ext::printAirQuality(polucion* pollution,bool clear=true){
 }
 
 uint16_t Adafruit_ILI9341Ext::colorPollution(int aqi){
+  log_d("----------------------_> aqi:%d\r\n",aqi);
   switch(aqi){
-    case 1:
-      return ILI9341_GREEN;
-    case 2:
+    case 0:
       return ILI9341_CYAN;
+    case 1:
+      return ILI9341_BLUE;
+    case 2:
+      return ILI9341_GREEN;
     case 3:
-      return ILI9341_WHITE;
+      return ILI9341_YELLOW;
     case 4:
-      return ILI9341_MAROON;
-    case 5:
       return ILI9341_RED;
     default:
       return ILI9341_WHITE;
@@ -564,12 +564,6 @@ int Adafruit_ILI9341Ext::getNumLang(){
     return 0;
   else
     return 1;
-}
-
-void Adafruit_ILI9341Ext::printIconPba(char* icono){
-  byte pixel[4];
- 
-
 }
 
 
@@ -586,42 +580,24 @@ void Adafruit_ILI9341Ext::printIcon(Weather* currentData,int _x,int _y,bool forc
     delay(100);
     }
 
-  if(strcmp(iconWeather,"01d")==0)
-    icon = icon_01d;
-  else if(strcmp(iconWeather,"01n")==0)
-    icon = icon_01n;
-  else if(strcmp(iconWeather,"02d")==0)
-    icon = icon_02d;
-  else if(strcmp(iconWeather,"02n")==0)
-    icon = icon_02n;
-  else if(strcmp(iconWeather,"03d")==0)
-    icon = icon_03d;
-  else if(strcmp(iconWeather,"03n")==0)
-    icon = icon_03n;
-  else if(strcmp(iconWeather,"04d")==0)
-    icon = icon_04d;
-  else if(strcmp(iconWeather,"04n")==0)
-    icon = icon_04n;
-  else if(strcmp(iconWeather,"09d")==0)
-    icon = icon_09d;
-  else if(strcmp(iconWeather,"09n")==0)
-    icon = icon_09n;
-  else if(strcmp(iconWeather,"10d")==0)
-    icon = icon_10d;
-  else if(strcmp(iconWeather,"10n")==0)
-    icon = icon_10n;
-  else if(strcmp(iconWeather,"11d")==0)
-    icon = icon_11d;
-  else if(strcmp(iconWeather,"11n")==0)
-    icon = icon_11n;
-  else if(strcmp(iconWeather,"13d")==0)
-    icon = icon_13d;
-  else if(strcmp(iconWeather,"13n")==0)
-    icon = icon_13n;
-  else if(strcmp(iconWeather,"50d")==0)
-    icon = icon_50d;
-  else if(strcmp(iconWeather,"50n")==0)
-    icon = icon_50n;
+  if(strcmp(iconWeather,"01d")==0)         icon = icon_01d;
+  else if(strcmp(iconWeather,"01n")==0)    icon = icon_01n;
+  else if(strcmp(iconWeather,"02d")==0)    icon = icon_02d;
+  else if(strcmp(iconWeather,"02n")==0)    icon = icon_02n;
+  else if(strcmp(iconWeather,"03d")==0)    icon = icon_03d;
+  else if(strcmp(iconWeather,"03n")==0)    icon = icon_03n;
+  else if(strcmp(iconWeather,"04d")==0)    icon = icon_04d;
+  else if(strcmp(iconWeather,"04n")==0)    icon = icon_04n;
+  else if(strcmp(iconWeather,"09d")==0)    icon = icon_09d;
+  else if(strcmp(iconWeather,"09n")==0)    icon = icon_09n;
+  else if(strcmp(iconWeather,"10d")==0)    icon = icon_10d;
+  else if(strcmp(iconWeather,"10n")==0)    icon = icon_10n;
+  else if(strcmp(iconWeather,"11d")==0)    icon = icon_11d;
+  else if(strcmp(iconWeather,"11n")==0)    icon = icon_11n;
+  else if(strcmp(iconWeather,"13d")==0)    icon = icon_13d;
+  else if(strcmp(iconWeather,"13n")==0)    icon = icon_13n;
+  else if(strcmp(iconWeather,"50d")==0)    icon = icon_50d;
+  else if(strcmp(iconWeather,"50n")==0)    icon = icon_50n;
 
   for(int y=_y; y < 100 +_y  ; y++){
     for(int x=_x; x < 100 + _x ; x++){

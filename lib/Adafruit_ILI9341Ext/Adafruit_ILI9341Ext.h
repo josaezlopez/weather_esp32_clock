@@ -31,7 +31,7 @@ class Adafruit_ILI9341Ext : public Adafruit_ILI9341, public TaskParent {
         bool printForecast(OpenWeatherMap* Location,bool clear,int dia);
         void begin();
         void clear(uint16_t backgroundColor);
-        void printIconPba(char* icono);
+ 
 
 
 
