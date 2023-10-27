@@ -99,25 +99,31 @@ void loop(void) {
   Weather* currentData;
   uint32_t currentDatadt;
   int nPrev;  
-
   // Wait for data 
-  for(;!Location->isValidData();){
-    tft.printf("Update data...\r\n");
+  
+  while(Location->getCurrentDataResult()<0 || 
+        Location->getAirPollutionDataResult()<0 ||  
+        Location->getForecastDataResult()<0){
+    tft.printf("Update current data.\r\n");
     delay(1000);
     }
+
+
   currentData = Location->getCurrentData();
   currentDatadt = currentData->dt;
 
 
   while(true){
-    tft.printCurrent(currentData,true,nullptr);  
+    if(Location->getCurrentDataResult()==200)
+      tft.printCurrent(currentData,true,nullptr);  
     tft.resume();                                 
 
     log_d("Current data screen.\r\n");
     while(xQueueReceive(button.getQueue(),&pressDuration,1) != pdPASS){    
       if(currentDatadt != currentData->dt){
-        tft.printCurrent(currentData,true,nullptr);   
-        Serial.printf("Actualizando datos");
+        if(Location->getCurrentDataResult()==200)
+          tft.printCurrent(currentData,true,nullptr);   
+
         currentDatadt = currentData->dt;
         }
       vPortYield();
@@ -141,11 +147,12 @@ void loop(void) {
     while(xSemaphoreTake(xSemaphoreTFT,(TickType_t) 1) != pdTRUE){ vPortYield(); } 
     tft.suspend();
     xSemaphoreGive(xSemaphoreTFT);
-    
-    tft.printAirQuality(Location->getPollution(),true);     //sCREEN2
+    if(Location->getAirPollutionDataResult()==200)
+      tft.printAirQuality(Location->getPollution(),true);     //sCREEN2
     while(xQueueReceive(button.getQueue(),&pressDuration,1) != pdPASS){    // while not push button
         if(currentDatadt != currentData->dt){
-          tft.printAirQuality(Location->getPollution(),true);    // Print Screen2
+          if(Location->getAirPollutionDataResult()==200)
+            tft.printAirQuality(Location->getPollution(),true);    // Print Screen2
           currentDatadt = currentData->dt;
           }
         vPortYield();
@@ -154,10 +161,12 @@ void loop(void) {
     log_d("Current data screen, detail\r\n");
     
     tft.suspend();
-    tft.printWeatherData(Location->getCurrentData(),true);    //sCREEN3
+    if(Location->getCurrentDataResult()==200)
+      tft.printWeatherData(Location->getCurrentData(),true);    //sCREEN3
     while(xQueueReceive(button.getQueue(),&pressDuration,1) != pdPASS){    // while not push button
         if(currentDatadt != currentData->dt){
-          tft.printWeatherData(Location->getCurrentData(),true);    // Print Screen2
+          if(Location->getCurrentDataResult()==200)
+            tft.printWeatherData(Location->getCurrentData(),true);    // Print Screen2
           currentDatadt = currentData->dt;
           }
         vPortYield();
@@ -166,12 +175,17 @@ void loop(void) {
       if(pressDuration > 500){
         nPrev = 0;
         while(true){
-            if(!tft.printForecast(Location,true,nPrev++)){
-              nPrev = 0;
+            if(Location->getForecastDataResult()==200){
+              if(!tft.printForecast(Location,true,nPrev++)){
+                nPrev = 0;
+                break;
+                }
+              log_d("Forecast %d\r\n",nPrev);
+              while(xQueueReceive(button.getQueue(),&pressDuration,1) != pdTRUE)  vPortYield();
+            }
+            else{
               break;
               }
-            log_d("Forecast %d\r\n",nPrev);
-            while(xQueueReceive(button.getQueue(),&pressDuration,1) != pdTRUE)  vPortYield();
           }
         }
     }

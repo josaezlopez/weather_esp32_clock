@@ -63,6 +63,7 @@ void OpenWeatherMap::update(){
     while( xSemaphoreTake( xSemaphoreData, ( TickType_t ) 100 ) != pdTRUE ){
          delay(1); 
          };
+    forecastDataResult = currentDataResult = airPollutionDataResult = -1;     
     bool errCD = dlCurrentData();
     log_d("Updating current data\r\n");
     bool errPD = dlPollutionData();
@@ -86,7 +87,8 @@ bool OpenWeatherMap::dlCurrentData(){
     http.begin(urlBuffer);
     int httpResponseCode = http.GET();
     
-    if (httpResponseCode>0) {
+    if (httpResponseCode==200) {
+        currentDataResult = httpResponseCode;
         String payLoad = http.getString();
         DeserializationError err = deserializeJson(doc, payLoad);
         if (err) {
@@ -148,6 +150,7 @@ bool OpenWeatherMap::dlCurrentData(){
     else{
         validDataCurrent = false;
         updating = updatingCurrentCast = false;
+        currentDataResult = httpResponseCode;
         return false;
         }
     http.end();
@@ -160,136 +163,126 @@ bool OpenWeatherMap::dlCurrentData(){
 
 // Download forecasta data
 bool OpenWeatherMap::dlForecastData(){
-
-    if(currentData.cod!=200){
-        log_d("Cod %d: %s\r\n",currentData.cod, currentData.errMsg);
-        validDataForeCast = false;
-        updating = updatingForeCast = false;
-        return true;
-    }
-
     HTTPClient http;
     DynamicJsonDocument doc(24576);
-    String payLoad;
 
-    validDataForeCast = false;
-    updating = updatingForeCast = true;
-    
+
     sprintf(urlBuffer,UrlForecastData,setting.home.lat,setting.home.lon,setting.owm_apikey,setting.lang);
     http.begin(urlBuffer);
     int httpResponseCode = http.GET();
+    validDataForeCast = false;
+    updating = updatingForeCast = true;
+  
+    if (httpResponseCode==200) {
+        forecastDataResult = httpResponseCode;
+        String payLoad = http.getString();
+        
+        DeserializationError err = deserializeJson(doc, payLoad);
+        if (err) {
+            log_e("deserializeJson() failed with code %s\r\n",err.c_str());
+            validDataForeCast = false;
+            updating = updatingForeCast = false;
+            return false;
+            }
+
+        foreCastList.clear();
+        foreCast item;
+        weatherId weatherMain;
+        struct tm tm;
+
+        for (JsonObject list_item : doc["list"].as<JsonArray>()) {
+            
+            // main
+            JsonObject list_item_main = list_item["main"];
+
+            item._SWeather_main.temp = list_item_main["temp"];
+            item._SWeather_main.feels_like = list_item_main["feels_like"]; 
+            item._SWeather_main.temp_min = list_item_main["temp_min"]; 
+            item._SWeather_main.temp_max = list_item_main["temp_max"]; 
+            item._SWeather_main.pressure = list_item_main["pressure"]; 
+            item._SWeather_main.sea_level = list_item_main["sea_level"];
+            item._SWeather_main.ground_level = list_item_main["ground_level"];
+            item._SWeather_main.humidity = list_item_main["humidity"]; 
+            item._SWeather_main.temp_kf = list_item_main["temp_kf"]; 
+
+            // weather
+            JsonObject list_item_weather_0 = list_item["weather"][0];
+            item._Sweather.id = list_item_weather_0["id"]; 
+            strcpy(item._Sweather.main,list_item_weather_0["main"]);
+            strcpy(item._Sweather.description,list_item_weather_0["description"]);
+            item._Sweather.description[0] = toupper(item._Sweather.description[0]);
+            strcpy(item._Sweather.icon,list_item_weather_0["icon"]);
+            
+            // clouds
+            item._Sclouds.all =  list_item["clouds"]["all"]; 
+
+            // wind
+            JsonObject list_item_wind = list_item["wind"];
+            item._Swind.speed = list_item_wind["speed"]; 
+            item._Swind.deg = list_item_wind["deg"]; 
+            item._Swind.gust = list_item_wind["gust"]; 
+            getNameWind(item._Swind.deg,&item._Swind);
+            item._Swind.visibility = list_item_wind["visibility"];
+            item.pop = list_item["pop"];
+            
+            strcpy(item.pod, list_item["sys"]["pod"]); 
+            strcpy(item.dt_txt, list_item["dt_txt"]); 
+            // Name od day
+            strptime(item.dt_txt,"%Y-%m-%d %H:%M:%S", &tm);
+            strcpy(item.dayName,timeClient->getNameOfDay(tm.tm_wday));  
     
-    if (httpResponseCode>0) {
-        payLoad = http.getString();
-        }
-    DeserializationError err = deserializeJson(doc, payLoad);
-    if (err) {
-        log_e("deserializeJson() failed with code %s\r\n",err.c_str());
+            /* only hour*/ 
+            String sdt_txt = String(item.dt_txt);
+            strcpy(item.hour,sdt_txt.substring(11,16).c_str());  
+        
+            foreCastList.push_back(item);
+            }
+
+        if(foreCastList.size()==0){
+            validDataForeCast = false;
+            updating = updatingForeCast = false;
+            return false;
+            }
+        // city
+        JsonObject city = doc["city"];
+
+        cityData.id = city["id"]; 
+        strcpy(cityData.name,city["name"]); 
+        cityData.coords.lat = city["coord"]["lat"];
+        cityData.coords.lon = city["coord"]["lon"];
+        strcpy(cityData.country,city["country"]);
+        cityData.population = city["population"];
+        cityData.timezone = city["timezone"];
+        cityData.sunrise = city["sunrise"];
+        cityData.sunrise = city["sunset"];
+
+        http.end();
+        validDataForeCast = true;
+        updating = updatingForeCast = false;
+        return true;
+    }
+    else{
+        forecastDataResult = httpResponseCode;
         validDataForeCast = false;
         updating = updatingForeCast = false;
         return false;
         }
 
-    foreCastList.clear();
-    foreCast item;
-    weatherId weatherMain;
-    struct tm tm;
-
-    for (JsonObject list_item : doc["list"].as<JsonArray>()) {
-        
-        // main
-        JsonObject list_item_main = list_item["main"];
-
-        item._SWeather_main.temp = list_item_main["temp"];
-        item._SWeather_main.feels_like = list_item_main["feels_like"]; 
-        item._SWeather_main.temp_min = list_item_main["temp_min"]; 
-        item._SWeather_main.temp_max = list_item_main["temp_max"]; 
-        item._SWeather_main.pressure = list_item_main["pressure"]; 
-        item._SWeather_main.sea_level = list_item_main["sea_level"];
-        item._SWeather_main.ground_level = list_item_main["ground_level"];
-        item._SWeather_main.humidity = list_item_main["humidity"]; 
-        item._SWeather_main.temp_kf = list_item_main["temp_kf"]; 
-
-        // weather
-        JsonObject list_item_weather_0 = list_item["weather"][0];
-        item._Sweather.id = list_item_weather_0["id"]; 
-        strcpy(item._Sweather.main,list_item_weather_0["main"]);
-        strcpy(item._Sweather.description,list_item_weather_0["description"]);
-        item._Sweather.description[0] = toupper(item._Sweather.description[0]);
-        strcpy(item._Sweather.icon,list_item_weather_0["icon"]);
-        
-        // clouds
-        item._Sclouds.all =  list_item["clouds"]["all"]; 
-
-        // wind
-        JsonObject list_item_wind = list_item["wind"];
-        item._Swind.speed = list_item_wind["speed"]; 
-        item._Swind.deg = list_item_wind["deg"]; 
-        item._Swind.gust = list_item_wind["gust"]; 
-        getNameWind(item._Swind.deg,&item._Swind);
-        item._Swind.visibility = list_item_wind["visibility"];
-        item.pop = list_item["pop"];
-        
-        strcpy(item.pod, list_item["sys"]["pod"]); 
-        strcpy(item.dt_txt, list_item["dt_txt"]); 
-        // Name od day
-        strptime(item.dt_txt,"%Y-%m-%d %H:%M:%S", &tm);
-        strcpy(item.dayName,timeClient->getNameOfDay(tm.tm_wday));  
- 
-        /* only hour*/ 
-        String sdt_txt = String(item.dt_txt);
-        strcpy(item.hour,sdt_txt.substring(11,16).c_str());  
-    
-        foreCastList.push_back(item);
-        }
-
-    if(foreCastList.size()==0){
-        validDataForeCast = false;
-        updating = updatingForeCast = false;
-        return false;
-    }
-    // city
-    JsonObject city = doc["city"];
-
-    cityData.id = city["id"]; 
-    strcpy(cityData.name,city["name"]); 
-    cityData.coords.lat = city["coord"]["lat"];
-    cityData.coords.lon = city["coord"]["lon"];
-    strcpy(cityData.country,city["country"]);
-    cityData.population = city["population"];
-    cityData.timezone = city["timezone"];
-    cityData.sunrise = city["sunrise"];
-    cityData.sunrise = city["sunset"];
-
-    http.end();
-    validDataForeCast = true;
-    updating = updatingForeCast = false;
-    return true;
-
-    }
+}
 
 // Download pollution data
 bool  OpenWeatherMap::dlPollutionData(){
-
-    if(currentData.cod!=200){
-        log_d("Cod %d: %s\r\n",currentData.cod, currentData.errMsg);
-        validDataPollution = false;
-        updating = updatingPollutionData = false;
-        return true;
-    }
-
     HTTPClient http;
     DynamicJsonDocument doc(1100);
 
     validDataPollution = false;
     updating = updatingPollutionData = true;
-
-    
     sprintf(urlBuffer,UrlPollution,setting.home.lat,setting.home.lon,setting.owm_apikey,setting.lang);
     http.begin(urlBuffer);
     int httpResponseCode = http.GET();
     
-    if (httpResponseCode>0) {
+    if (httpResponseCode==200) {
+        airPollutionDataResult = httpResponseCode;
         String payLoad = http.getString();
         DeserializationError err = deserializeJson(doc, payLoad);
         if (err) {
@@ -321,18 +314,18 @@ bool  OpenWeatherMap::dlPollutionData(){
         pollution.pm10 = list_0_components["pm10"]; 
         pollution.nh3 = list_0_components["nh3"]; 
         pollution.dt = list_0["dt"]; 
+
+        http.end();
+        validDataPollution = true;
+        updating = updatingPollutionData = false;
+        return true;
         }
     else{
+        airPollutionDataResult = httpResponseCode;
         validDataPollution = false;
         updating = updatingPollutionData = false;
         return false;
-    }
-
-    http.end();
-    validDataPollution = true;
-    updating = updatingPollutionData = false;
-    return true;
-
+        }
 }
 
 // Nombres de los vientos en mediterraneo...

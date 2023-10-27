@@ -14,7 +14,7 @@
 
 #define ZeroAbs -273.15
 #define UrlCurrentData  "http://api.openweathermap.org/data/2.5/weather?lat=%f&lon=%f&appid=%s&lang=%s"
-#define UrlForecastData "https://api.openweathermap.org/data/2.5/forecast?lat=%f&lon=%f&appid=%s&lang=%s"
+#define UrlForecastData "http://api.openweathermap.org/data/2.5/forecast?lat=%f&lon=%f&appid=%s&lang=%s"
 #define UrlPollution    "http://api.openweathermap.org/data/2.5/air_pollution?lat=%f&lon=%f&appid=%s"
 
 struct weatherId{
@@ -155,6 +155,12 @@ class OpenWeatherMap : public  TaskParent{
         std::list<foreCast>* getForecastList();
         city getCityData() { return cityData;};
         void forceUpdate();
+        bool getValidDataCurrent(){ return validDataCurrent; }
+        bool getValidDataForecast(){ return validDataForeCast; }
+        bool getValidDataPollution(){ return validDataPollution; }
+        int getCurrentDataResult(){ return currentDataResult; }
+        int getAirPollutionDataResult(){ return airPollutionDataResult; }
+        int getForecastDataResult(){ return forecastDataResult; }
 
    protected:
       void loop();
@@ -176,6 +182,10 @@ class OpenWeatherMap : public  TaskParent{
       bool validDataCurrent = false;
       bool validDataForeCast = false;
       bool validDataPollution = false;
+      int currentDataResult = -1;
+      int airPollutionDataResult = -1;
+      int forecastDataResult = -1;
+
       bool allUpdated = false;
       bool updating = false;
       bool flagForceUpdate = false;
