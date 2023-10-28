@@ -4,9 +4,10 @@
 #include <threadesp32.h>
 #include <NTPClientExt.hpp>
 #include <Adafruit_ILI9341.h>
-#include <Weather.h>
 #include <Adafruit_BME280.h>
 #include <list>
+
+#include "Weather.h"
 
 
 #define CLOCKTASK_NAME "WCLOCK"

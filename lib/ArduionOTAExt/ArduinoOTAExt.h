@@ -4,7 +4,8 @@
 #include <threadesp32.h>
 #include <esp_task_wdt.h>
 #include <ESPmDNS.h>
-#include <Adafruit_ILI9341Ext.h>
+
+#include "Adafruit_ILI9341Ext.h"
 
 #define OTATASK_NAME        "OTAEXT"
 #define OTATASK_HEAP        (4* 1024)

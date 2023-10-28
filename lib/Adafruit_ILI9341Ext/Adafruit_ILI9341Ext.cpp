@@ -1,5 +1,4 @@
-#include <Adafruit_ILI9341Ext.h>
-#include <freertos/task.h>
+#include "Adafruit_ILI9341Ext.h"
 #include "icons.h"
 
 #define HALT while(true) taskYIELD()

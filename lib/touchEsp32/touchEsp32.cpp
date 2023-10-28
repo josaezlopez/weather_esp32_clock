@@ -1,4 +1,4 @@
-#include <touchEsp32.h>
+#include "touchEsp32.h"
 
 
 touchEsp32::touchEsp32(int _pin):TaskParent(TOUCHTASK_NAME,TOUCHTASK_HEAP,TOUCHTASK_PRIORITY, TOUCHTASK_CORE){
