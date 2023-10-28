@@ -3,6 +3,9 @@
 #include <Adafruit_BME280.h>
 #include <NTPClientExt.hpp>
 
+#include "soc/soc.h"
+#include "soc/rtc_cntl_reg.h"
+
 #include "Adafruit_ILI9341Ext.h"
 #include "ArduinoOTAExt.h"
 #include "touchEsp32.h"
@@ -10,6 +13,7 @@
 #include "WebServerExt.h"
 #include "funcaux.h"
 #include "conf.h"
+
 
 
 #define HALT while(true) taskYIELD()
@@ -39,6 +43,7 @@ conf setting;
 
 
 void setup() {
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
   Serial.begin(115200);
 
   bool connected = true;
@@ -81,7 +86,7 @@ void setup() {
   tft.print("\r\nhttp://");
   tft.println(WiFi.localIP());
   
-  
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 1);
   // Start WEB server task
   httpServer = new WebServerExt(WEBSERVER_PORT);
   
