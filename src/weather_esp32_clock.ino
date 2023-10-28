@@ -1,14 +1,15 @@
 #include <Arduino.h>
 #include <WiFi.h>
-#include <Adafruit_ILI9341Ext.h>
-#include <ArduinoOTAExt.h>
 #include <Adafruit_BME280.h>
-#include <touchEsp32.h>
-#include <Weather.h>
-#include <WebServerExt.h>
 #include <NTPClientExt.hpp>
-#include <funcaux.h>
-#include <conf.h>
+
+#include "Adafruit_ILI9341Ext.h"
+#include "ArduinoOTAExt.h"
+#include "touchEsp32.h"
+#include "Weather.h"
+#include "WebServerExt.h"
+#include "funcaux.h"
+#include "conf.h"
 
 
 #define HALT while(true) taskYIELD()
