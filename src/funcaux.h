@@ -1,10 +1,10 @@
 #pragma once
 
 #include <Arduino.h>
-#include <Weather.h>
 #include <EEPROM.h>
 #include <CRC32.h>
-#include <conf.h>
+#include "Weather.h"
+#include "conf.h"
 
 void clearEEPROM();
 bool checkEEPROM();

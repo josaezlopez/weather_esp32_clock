@@ -1,4 +1,4 @@
-#include <funcaux.h>
+#include "funcaux.h"
 
 extern conf setting;
 
