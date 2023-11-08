@@ -35,7 +35,7 @@ Estacion meteorológica con reloj de escritorio basada en api.openweathermap.org
 
 ## Compilación:
 
-Antes de compilar modifique **src/conf.h** para poner el ssid password de su WIFI y la APIKEY de openweathermaps.
+Antes de compilar modifique **lib/funcaux/conf.h** para poner el ssid password de su WIFI y la APIKEY de openweathermaps.
 Si no tiene instalado el sensor BME280 cambie la directiva **ENABLE_BME280** a false. 
 Se usa el apikey gratuito, desde aquí se puede conseguir el apikey: https://openweathermap.org/price.
   
