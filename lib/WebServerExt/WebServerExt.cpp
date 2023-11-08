@@ -3,10 +3,12 @@
 
 extern void debugSettings();
 extern WebServerExt* httpServer;
+extern WebServerConf* httpServerConf;
 extern OpenWeatherMap* Location;
 extern NTPClientExt* timeClient;
 extern conf setting;
 extern void updateCRC();
+extern std::list<ssidInfo> SSIDList;
 
 const char* homePage =
     "<html>\
@@ -23,7 +25,7 @@ const char* homePage =
         <body>\
             <h1>Wstation ESP32</h1>\
             <form action='/update/' method='post'>\
-                SSID    : <input type='text' disabled name='ssid' value='%s'><br>\
+                SSID    : <input type='text' name='ssid' value='%s'><br>\
                 <div class='div-1'>\
                     Language : %s<br>\
                     APIKey  : <input type='text' name='apikey' value='%s' size='36'><br>\
@@ -70,6 +72,30 @@ const char* toRoot =
             </form>\
         </body>\
         </html>";
+
+
+const char* homePageConf =
+    "<html>\
+        <head>\
+            <meta  name='viewport' content='width=device-width, initial-scale=1'>\
+            <title>ESP32 WStation Config</title>\
+            <style>\
+                body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Color: #000088; }\
+            </style>\
+        </head>\
+        <style> .div-1 {background: #EBEBEB;}\
+            div { height: 100px;margin: 0px;border: 2px solid;background-color: #FBD603;}\
+        </style>\
+        <body>\
+            <h1>Wstation ESP32</h1>\
+            <form action='/update/' method='post'>\
+                SSID    : %s<br>\
+                Password: <input type='text' name='password' value='%s'><br>\
+                <button type='submit' name='b1' value='update'>Update</button>\
+            </form>\
+        </body>\
+        </html>";
+
 
 String selectUnitTemperature(char* value){
     String ret =  String("<select name='unittemp'>");
@@ -181,10 +207,55 @@ void WebServerExt::loop(){
         }
     }
 
+WebServerConf::WebServerConf(int port)
+    :WebServer(port),TaskParent(WEBTASK_NAME,WEBTASK_HEAP,WEBTASK_PRIORITY, WEBTASK_CORE){
+    on("/", handleRootConf);
+    on("/update/", updateConf);
+    }
+
+
+void WebServerConf::loop(){
+    delay(1000);
+    begin();
+    while(true){
+        handleClient();
+        delay(1);
+        }
+    }
+
+String selectSSID(){
+    String ret =  String("<select name='ssid'> id='ssid'");
+    char ssidName[100];
+    for(ssidInfo item : SSIDList){
+        sprintf(ssidName,"%s RSSI:%d",item.ssid,item.rssi);
+        ret += String("<option value='") + item.ssid + String("'>") + String(ssidName) + String("></option>");
+        }
+    ret += "</select>";
+    return ret;
+}
+
+
+
+void updateConf(){
+
+    String ssid = httpServerConf->arg("ssid");
+    String password = httpServerConf->arg("password");
+
+    strcpy(setting.ssid,ssid.c_str());
+    strcpy(setting.password,password.c_str());
+
+    EEPROM.put(0x0,setting);
+    updateCRC();
+    debugSettings();
+    httpServerConf->send(200,"text/html",toRoot);
+    delay(5000);
+    esp_restart();
+}
+
 
 void update(){
-
-    String unitTemp = httpServer->arg("unittemp");
+    bool boot =false;
+    String unitTemp = httpServer->arg("unitTemp");
     String language = httpServer->arg("language");
     String coordText = httpServer->arg("coord");
     String timeZone = httpServer->arg("timezone");
@@ -203,7 +274,7 @@ void update(){
             nPeriod++;
         }
         if(coordText.charAt(n)==','){
-            nPeriod++;
+            nComma++;
         }
     }
 
@@ -242,6 +313,8 @@ void update(){
     setting.monthStartDS = startDS==0 ? setting.monthStartDS : startDS;
     setting.monthEndDS = endDS==0 ? setting.monthEndDS : endDS;
 
+    if(strcmp(setting.owm_apikey,apikey.c_str())!=0) 
+        boot = true;
     strcpy(setting.owm_apikey,apikey.c_str());
     setting.owm_tupdate = tupdate.toInt();
     
@@ -258,6 +331,8 @@ void update(){
     updateCRC();
     debugSettings();
     httpServer->send(200,"text/html",toRoot);
+    delay(2000);
+    esp_restart();
 }
 
 void handleRoot(){
@@ -281,5 +356,14 @@ void handleRoot(){
 
 }
 
+void handleRootConf(){
+   
+    static char buffer[4096];
+ 
+    sprintf(buffer,homePageConf, selectSSID().c_str(),setting.password);
+   
+    httpServerConf->send(200,"text/html",buffer);
+
+}
 
 

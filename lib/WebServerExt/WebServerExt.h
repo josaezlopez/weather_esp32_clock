@@ -2,8 +2,8 @@
 
 #include <WebServer.h>
 #include <threadesp32.h>
-
 #include "Weather.h"
+#include "funcaux.h"
 
 #define WEBTASK_NAME        "WEBSERVER"
 #define WEBTASK_HEAP        (5 * 1024)
@@ -18,6 +18,8 @@ String optionSelectTimezone(int value,int tz);
 String selectTimezone(int value);
 void update();
 void handleRoot();
+void handleRootConf();
+void updateConf();
 
 
 class WebServerExt : public WebServer, public TaskParent{
@@ -28,3 +30,10 @@ class WebServerExt : public WebServer, public TaskParent{
     
 };
 
+class WebServerConf : public WebServer, public TaskParent{
+    public:
+        WebServerConf(int port);
+    protected:
+        void loop();
+    
+};

@@ -21,3 +21,4 @@ conf getConfig(bool& isSet);
 void debugSettings();
 void getSSIDList(std::list<ssidInfo>* ssidList);
 bool connect(const char* ssid ,const char* password);
+String selectSSID();

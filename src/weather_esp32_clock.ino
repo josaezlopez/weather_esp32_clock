@@ -2,10 +2,8 @@
 #include <WiFi.h>
 #include <Adafruit_BME280.h>
 #include <NTPClientExt.hpp>
-
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
-
 #include "Adafruit_ILI9341Ext.h"
 #include "ArduinoOTAExt.h"
 #include "touchEsp32.h"
@@ -13,10 +11,7 @@
 #include "WebServerExt.h"
 #include "funcaux.h"
 #include "conf.h"
-
 #include <list>
-
-
 
 
 #define HALT while(true) taskYIELD()
@@ -35,15 +30,14 @@
 SemaphoreHandle_t semaphoreData = NULL;
 SemaphoreHandle_t semaphoreTFT = NULL;
 WebServerExt* httpServer;
+WebServerConf* httpServerConf;
 NTPClientExt* timeClient;
 Adafruit_ILI9341Ext tft = Adafruit_ILI9341Ext();  // Start screen task
 OpenWeatherMap* Location;
 touchEsp32 button(BUTTON_PIN);                    // Start button task 
 ArduinoOTAExt* OTAExt;
-
 conf setting;
 std::list<ssidInfo> SSIDList;
-
 
 
 void setup() {
@@ -54,11 +48,6 @@ void setup() {
   semaphoreData = xSemaphoreCreateMutex();
   semaphoreTFT = xSemaphoreCreateMutex();
 
-
-  #if ENABLE_BME280
-   bme280 = new Adafruit_BME280;
-   bme280->begin(BME280ADDRESS);  
-  #endif
 
   tft.begin();
 
@@ -77,8 +66,14 @@ void setup() {
         tft.print("http://");
         tft.print(WiFi.softAPIP());
         tft.println(" to configure the WIFI.");
+        httpServerConf = new WebServerConf(WEBSERVER_PORT);
         HALT;
     }
+
+  #if ENABLE_BME280
+    bme280 = new Adafruit_BME280;
+    bme280->begin(BME280ADDRESS);  
+  #endif
 
    OTAExt = new ArduinoOTAExt(tft,PASSOTA,STR(mDNSName));  // Start OTA and  MDNS task
 
@@ -111,12 +106,17 @@ void loop(void) {
   int nPrev;  
   // Wait for data 
   
-  while(Location->getCurrentDataResult()<0 || 
+  while(Location->getCurrentDataResult()<0 ||
         Location->getAirPollutionDataResult()<0 ||  
         Location->getForecastDataResult()<0){
     tft.printf("Update current data.\r\n");
     delay(1000);
     }
+
+  if(!Location->getValidDataCurrent()){
+    tft.println("Error: Is the api key valid?");
+    HALT;
+  }
 
 
   currentData = Location->getCurrentData();

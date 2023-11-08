@@ -71,12 +71,13 @@ conf getConfig(bool& isSet){
     EEPROM.put(0x0,setting);
     updateCRC();
 
+
   }
 
   else{
     EEPROM.get(0x0,setting);
   }
-
+    debugSettings();
   return setting;
 }
 
