@@ -14,6 +14,9 @@
 #include "funcaux.h"
 #include "conf.h"
 
+#include <list>
+
+
 
 
 #define HALT while(true) taskYIELD()
@@ -29,26 +32,27 @@
 #endif
 
 
-SemaphoreHandle_t xSemaphoreData = NULL;
-SemaphoreHandle_t xSemaphoreTFT = NULL;
+SemaphoreHandle_t semaphoreData = NULL;
+SemaphoreHandle_t semaphoreTFT = NULL;
 WebServerExt* httpServer;
 NTPClientExt* timeClient;
 Adafruit_ILI9341Ext tft = Adafruit_ILI9341Ext();  // Start screen task
 OpenWeatherMap* Location;
-touchEsp32 button(BUTTON_PIN);                    // Start button task
-ArduinoOTAExt OTAExt(tft,PASSOTA,STR(mDNSName));  // Start OTA and  MDNS task
+touchEsp32 button(BUTTON_PIN);                    // Start button task 
+ArduinoOTAExt* OTAExt;
 
 conf setting;
+std::list<ssidInfo> SSIDList;
 
 
 
 void setup() {
+  bool isSet;
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
   Serial.begin(115200);
-
-  bool connected = true;
-  xSemaphoreData = xSemaphoreCreateMutex();
-  xSemaphoreTFT = xSemaphoreCreateMutex();
+  setting = getConfig(isSet);
+  semaphoreData = xSemaphoreCreateMutex();
+  semaphoreTFT = xSemaphoreCreateMutex();
 
 
   #if ENABLE_BME280
@@ -56,28 +60,28 @@ void setup() {
    bme280->begin(BME280ADDRESS);  
   #endif
 
-  setting = getConfig();
   tft.begin();
 
-
-
-  WiFi.begin(setting.ssid,setting.password);
-  tft.print("Connecting");
-  int connectionAttempts = 0;
-  while(WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-    tft.print(".");
-    connectionAttempts++;
-    if(connectionAttempts > 30){
-      connected = false;
-      break;
-      }
+  if(!connect(setting.ssid,setting.password)){
+        getSSIDList(&SSIDList);
+        // Change to AP mode
+        WiFi.mode(WIFI_AP);
+        WiFi.softAP(STR(mDNSName),NULL,1,0);
+        WiFi.begin();
+        tft.println("");
+        tft.print("Cannot connect to ");
+        tft.println(setting.ssid);
+        tft.print("Associate to SSID ");
+        tft.println(WiFi.softAPSSID());
+        tft.println("and then, from the browser, open ");
+        tft.print("http://");
+        tft.print(WiFi.softAPIP());
+        tft.println(" to configure the WIFI.");
+        HALT;
     }
 
-  if(!connected){
-    tft.printf("\r\nNo connection to %s\r\n",setting.ssid);
-    tft.printf("\r\nErase flash memory and recompile\r\n");
-    }
+   OTAExt = new ArduinoOTAExt(tft,PASSOTA,STR(mDNSName));  // Start OTA and  MDNS task
+
 
   tft.printf("ok\r\n");
   tft.setTextSize(1);
@@ -150,9 +154,9 @@ void loop(void) {
 
     log_d("Air quality display");
     // It cannot be suspended if the traffic light is taken
-    while(xSemaphoreTake(xSemaphoreTFT,(TickType_t) 1) != pdTRUE){ vPortYield(); } 
+    while(xSemaphoreTake(semaphoreTFT,(TickType_t) 1) != pdTRUE){ vPortYield(); } 
     tft.suspend();
-    xSemaphoreGive(xSemaphoreTFT);
+    xSemaphoreGive(semaphoreTFT);
     if(Location->getAirPollutionDataResult()==200)
       tft.printAirQuality(Location->getPollution(),true);     //sCREEN2
     while(xQueueReceive(button.getQueue(),&pressDuration,1) != pdPASS){    // while not push button

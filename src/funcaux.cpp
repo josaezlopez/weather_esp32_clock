@@ -1,6 +1,7 @@
 #include "funcaux.h"
 
 extern conf setting;
+extern Adafruit_ILI9341Ext tft;
 
 void clearEEPROM(){
     EEPROM.begin(EEPROMSIZE);
@@ -40,13 +41,15 @@ void updateCRC(){
 }
 
 // Return the setting
-conf getConfig(){
+conf getConfig(bool& isSet){
+  isSet = true;
   conf setting;
 
   EEPROM.begin(EEPROMSIZE);
 
   if(!checkEEPROM()){
-    Serial.println("Actualizando EEPROM");
+    isSet = false; 
+    Serial.println("Init EEPROM");
     for(int address=0 ; address<EEPROMSIZE ; address++){
       EEPROM.write(address,0x0);
       }
@@ -91,4 +94,34 @@ void debugSettings(){
         setting.owm_tupdate,
         setting.owm_apikey);
 
+}
+
+bool connect(const char* ssid ,const char* password){
+  WiFi.begin(setting.ssid,setting.password);
+  tft.print("Connecting");
+  int connectionAttempts = 0;
+  while(WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    tft.print(".");
+    connectionAttempts++;
+    if(connectionAttempts > 30){
+      return false;
+      break;
+      }
+    }
+  return true;
+}
+
+void getSSIDList(std::list<ssidInfo>* ssidList){
+  ssidInfo ssid;
+  ssidList->clear();
+  WiFi.disconnect();
+  delay(100);
+  int n = WiFi.scanNetworks();
+  for(int i=0;i<n;i++){
+    strncpy(ssid.ssid, WiFi.SSID(i).c_str(),MAX_SSID_LEN);
+    ssid.rssi = WiFi.RSSI(i);
+    ssid.encription = WiFi.encryptionType(i);
+    ssidList->push_back(ssid);
+  }
 }

@@ -2,7 +2,7 @@
 
 extern conf setting;
 extern NTPClientExt* timeClient;
-extern SemaphoreHandle_t xSemaphoreData;
+extern SemaphoreHandle_t semaphoreData;
 
 // Constructor
 OpenWeatherMap::OpenWeatherMap(): 
@@ -60,7 +60,7 @@ void OpenWeatherMap::loop(){
 /// Update all data
 void OpenWeatherMap::update(){
     // Wait for semaphoreData
-    while( xSemaphoreTake( xSemaphoreData, ( TickType_t ) 100 ) != pdTRUE ){
+    while( xSemaphoreTake( semaphoreData, ( TickType_t ) 100 ) != pdTRUE ){
          delay(1); 
          };
     forecastDataResult = currentDataResult = airPollutionDataResult = -1;     
@@ -72,7 +72,7 @@ void OpenWeatherMap::update(){
     log_d("Updating forecast data\r\n");
     flagForceUpdate = false;
     allUpdated = errCD && errPD && errFD;
-    xSemaphoreGive( xSemaphoreData );
+    xSemaphoreGive( semaphoreData );
 }
 
 // Download the current data

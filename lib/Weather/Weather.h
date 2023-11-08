@@ -40,6 +40,7 @@ struct conf{
     char password[65];
     char owm_apikey[65];
     int  owm_tupdate;
+
 };
 
 struct weather{

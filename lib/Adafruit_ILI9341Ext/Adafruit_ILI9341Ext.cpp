@@ -4,8 +4,8 @@
 #define HALT while(true) taskYIELD()
 
 extern conf setting;
-extern SemaphoreHandle_t xSemaphoreData;
-extern SemaphoreHandle_t xSemaphoreTFT;
+extern SemaphoreHandle_t semaphoreData;
+extern SemaphoreHandle_t semaphoreTFT;
 extern OpenWeatherMap* Location;
 extern NTPClientExt* timeClient;
 
@@ -30,10 +30,10 @@ void Adafruit_ILI9341Ext::loop(){
     taskYIELD();
     }
   while(true){
-    if(xSemaphoreTake(xSemaphoreTFT,(TickType_t) 1 ) == pdTRUE){ 
+    if(xSemaphoreTake(semaphoreTFT,(TickType_t) 1 ) == pdTRUE){ 
       printTime(50,115,ILI9341_MAGENTA,color565(0xD4,0xD1,0x2F),ILI9341_BLACK);
       printTemp(Location->getCurrentData(),135,0);
-      xSemaphoreGive(xSemaphoreTFT);
+      xSemaphoreGive(semaphoreTFT);
       }
     delay(500);
     }
@@ -93,7 +93,7 @@ void Adafruit_ILI9341Ext::printWeatherData(Weather* currentData,bool clear=true)
   uint16_t colorDatos = ILI9341_GREEN;
   uint16_t backgroundColor = ILI9341_BLACK;
 
-  while(xSemaphoreTake(xSemaphoreTFT,(TickType_t) 1) != pdTRUE){ 
+  while(xSemaphoreTake(semaphoreTFT,(TickType_t) 1) != pdTRUE){ 
     delay(1000);
     }
 
@@ -203,7 +203,7 @@ void Adafruit_ILI9341Ext::printWeatherData(Weather* currentData,bool clear=true)
   setTextSize(2);
   setCursor(50,290);
   printFillRight(currentData->_weather.description,14,ILI9341_CYAN,ILI9341_BLACK);
-  xSemaphoreGive(xSemaphoreTFT);
+  xSemaphoreGive(semaphoreTFT);
 
 }
 
@@ -282,7 +282,7 @@ void Adafruit_ILI9341Ext::printCurrent(Weather* currentData,bool clear,Adafruit_
   uint16_t backgroundColor = ILI9341_BLACK;
   bme280 = _bme280;
 
-  if(xSemaphoreTake(xSemaphoreTFT,(TickType_t) 1)!=pdTRUE){ 
+  if(xSemaphoreTake(semaphoreTFT,(TickType_t) 1)!=pdTRUE){ 
     return;
     }
 
@@ -299,7 +299,7 @@ void Adafruit_ILI9341Ext::printCurrent(Weather* currentData,bool clear,Adafruit_
 
   printWind(50,240,currentData,ILI9341_CYAN,ILI9341_BLACK);
   printSun(50,280,currentData,ILI9341_WHITE,ILI9341_GREEN,ILI9341_BLACK);
-  xSemaphoreGive(xSemaphoreTFT);
+  xSemaphoreGive(semaphoreTFT);
 
   
 }
@@ -461,7 +461,7 @@ void Adafruit_ILI9341Ext::printAirQuality(polucion* pollution,bool clear=true){
   int yPos = 0;
   int increase = 20;
 
-  if(xSemaphoreTake(xSemaphoreTFT,(TickType_t) 1)!=pdTRUE){ 
+  if(xSemaphoreTake(semaphoreTFT,(TickType_t) 1)!=pdTRUE){ 
     return;
   }
 
@@ -535,7 +535,7 @@ void Adafruit_ILI9341Ext::printAirQuality(polucion* pollution,bool clear=true){
   setCursor(50,yPos);
   setTextColor(ILI9341_WHITE,backgroundColor);
   printf(text_unidades[0][getNumLang()]); 
-  xSemaphoreGive(xSemaphoreTFT);
+  xSemaphoreGive(semaphoreTFT);
 }
 
 uint16_t Adafruit_ILI9341Ext::colorPollution(int aqi){
@@ -575,7 +575,7 @@ void Adafruit_ILI9341Ext::printIcon(Weather* currentData,int _x,int _y,bool forc
     return;
     } 
 
-  while(xSemaphoreTake(xSemaphoreData,(TickType_t) 1)!=pdTRUE){ 
+  while(xSemaphoreTake(semaphoreData,(TickType_t) 1)!=pdTRUE){ 
     delay(100);
     }
 
@@ -608,7 +608,7 @@ void Adafruit_ILI9341Ext::printIcon(Weather* currentData,int _x,int _y,bool forc
   strcpy(lastIcon,iconWeather);
   log_d("The icon is redrawn\r\n");
 
-  xSemaphoreGive(xSemaphoreData);
+  xSemaphoreGive(semaphoreData);
 
 }
 
