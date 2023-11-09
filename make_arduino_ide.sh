@@ -4,9 +4,11 @@ mv lib/*/* .
 mv src/*.h .
 mv src/*.cpp .
 mv src/*.ino .
+rm -rf lib
+rm -rf src
 
 dlLibrarie(){
-	wget https://github.com/$1/$2/archive/$3.zip
+	curl -L https://github.com/$1/$2/archive/$3.zip --output $3.zip
 	mv $3.zip ../libraries/$3.zip
 	cd ../libraries	
 	unzip -o $3.zip
