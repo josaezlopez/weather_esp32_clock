@@ -12,11 +12,26 @@ Weather station with desktop clock based on api.openweathermap.org and BME280 fo
 
 #### Features:
   
-    NTP based clock.
-    Weather data from openweathermaps.org
+    NTP based clock with daylight saving time support.
+    Weather data from openweathermaps.org.
     Local temperature, humidity and pressure data from a BME280 sensor.
+    Web server with WIFI in AP mode to configure WIFI.
     Web server for configuration.
-    Weather forecast with probability of precipitation, temperature and description. 
+    Data displayed.
+        Date and Time.
+        Wind speed and direction, name of the wind.
+        Sunrise time.
+        Sunset time.
+        Weather description and icon.
+        Temperature.
+        Maximum temperature.
+        Minimum temperature.
+        Feels like.
+        Atmospheric pressure.
+        Relative humidity.
+        Location name.
+        Air quality, rating and data (CO,NO,NO2,O3,NH3,SO2,PM2-5 and PM10)
+        Five days of forecast with day name, time, temperature, probability of precipitation and description.
 
 #### D1 Mini ESP32 ESP-32:
 
