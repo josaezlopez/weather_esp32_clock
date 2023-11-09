@@ -72,8 +72,8 @@ Estación meteorológica con reloj de escritorio basada en api.openweathermap.or
 	            -Adafruit ILI9341@^1.5.14
 
     -Ejecute el IDE de arduino y abra el sketch weather_esp32_clock.ino.
-    -Configure la placa esp32 utilizada y el puerto al que está conectado, elija el esquema de particiones y el nivel de debug como se muestra en la image:
-    ![Alt text](/images/arduino_ide_settings.png) 
+    -Configure la placa esp32 utilizada y el puerto al que está conectado, elija el esquema de particiones y el nivel de debug como se muestra en la image:  
+![Alt text](/images/arduino_ide_settings.png) 
 
 #### PlaformIO
     Descarge o clone el repositorio, como en el caso anterior, sobre el directorio de projectos de Platformio.
