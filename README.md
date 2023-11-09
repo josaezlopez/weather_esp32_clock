@@ -69,9 +69,9 @@ Weather station with desktop clock based on api.openweathermap.org and BME280 fo
 #### PlatformIO
     Download or clone the repository, as in the previous case, to the Platformio projects directory.
 
-##Setting
+## Setting
 
-####conf.h
+#### conf.h
 If you do not have the BME280 sensor installed change the **ENABLE_BME280** directive to false.
 Optionally, you can enter the SSID, password and Apikey of openweathermaps or enter it later from the access point that you will create if you cannot connect.
 The free openweathermaps apikey can be obtained from here: https://openweathermap.org/price.
