@@ -1,6 +1,6 @@
 # weather_esp32_clock  
 
-Estacion meteorológica con reloj de escritorio basada en api.openweathermap.org y BME280 para esp32 en Arduino core.
+Estación meteorológica con reloj de escritorio basada en api.openweathermap.org y BME280 para esp32 en Arduino core.  
 
 ![Alt text](images/en_screen1.png)
 ![Alt text](images/es_screen1.png)
@@ -21,16 +21,16 @@ Estacion meteorológica con reloj de escritorio basada en api.openweathermap.org
         Velocidad y direccion del viento, nombre del viento.
         Hora de amanecer.
         Hora de anochecer.
-        Descripcion del clima e icono.
+        Descripción del clima e icono.
         Temperatura.
         Temperatura máxima.
         Temperatura mínima.
         Sensación térmica.
         Presión atmosférica.
-        Humadad relativa.
+        Humedad relativa.
         Nombre de la localización.
-        Calidad del aire, calificación y datos (CO,NO,NO2,O3,NH3,SO2,PM2-5 y PM10)
-        Cinco dias de prevision con nombre del dia, hora, temperatura, probabilidad de precipitación y descripción.
+        Calificación de la calidad del aire y datos (CO,NO,NO2,O3,NH3,SO2,PM2-5 y PM10)
+        Cinco días de previsión con nombre del día, hora, temperatura, probabilidad de precipitación y descripción.
 
 
 
@@ -53,17 +53,17 @@ Estacion meteorológica con reloj de escritorio basada en api.openweathermap.org
 ## Compilación
 #### Arduino IDE
 
-    Necesita tener soporte para las placas esp32, mire en https://espressif-docs.readthedocs-hosted.com/projects/arduino-esp32/en/latest/installing.html como relaizar la instalación.  
+    Necesita tener soporte para las placas esp32, mire en https://espressif-docs.readthedocs-hosted.com/projects/arduino-esp32/en/latest/installing.html como realizar la instalación.  
 
     -Instalar Git:  
       https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
     -Clonar el repositorio
-      Desde el directorio de Arduino ejecutar: git clone https://github.com/josaezlopez/weather_esp32_clock.git
+      Desde el directorio de Arduino ejecutad: git clone https://github.com/josaezlopez/weather_esp32_clock.git
     -Instalar las librerias
       Cambiese al directorio que creó git: cd weather_esp32_clock
         -En linux ejecutar el script make_arduino_ide.sh: sh make_arduino_ide.sh
         -En windows ejecutar el script make_arduino_ide.bat desde el cmd.
-            - Instalar las siguientes librerias desde el gestor de librerias del IDE.  
+            - Instalar las siguientes librerías desde el gestor de librerías del IDE.  
                 -ArduinoJson@^6.20.1
 	            -Adafruit BME280 Library@^2.2.2
 	            -Adafruit Unified Sensor@^1.1.7
@@ -76,24 +76,27 @@ Estacion meteorológica con reloj de escritorio basada en api.openweathermap.org
     ![Alt text](/images/arduino_ide_settings.png) 
 
 #### PlaformIO
+    Descarge o clone el repositorio, como en el caso anterior, sobre el directorio de projectos de Platformio.
 
+##Configuración
 
-
-
-
-
-
-Antes de compilar modifique **lib/funcaux/conf.h** para poner el ssid password de su WIFI y la APIKEY de openweathermaps.
+####conf.h
 Si no tiene instalado el sensor BME280 cambie la directiva **ENABLE_BME280** a false. 
-Se usa el apikey gratuito, desde aquí se puede conseguir el apikey: https://openweathermap.org/price.
+Opcionalmente, puede poner el SSID, password y Apikey de openweathermaps o bien ponerlo después desde el punto de acesso que creará si no puede conectar.
+El apikey gratuito de openweathermaps se puede conseguir desde aquí: https://openweathermap.org/price.
+
+Compile y suba el programa a la placa. 
+
   
-Si se usa platformio se resolverán correctamente todas las dependencias de las librerías.
-Existen dos entornos en platformio.ini: release y release_ota. release_ota permite programar el dispositivo por OTA.
-Después de compilar y enviar al esp32. Arrancará con la configuración por defecto, para cambiarla puede acceder a **http://wstation.local**
+Existen tres entornos en platformio.ini; release, release_ota y debug. El entorno release_ota hace el upload a la placa por WIFI. La primera vez que se envíe el programa hay que hacerlo por cable, usando el entorna release.
+
+Si se especificó el SSID y password correctos de su WIFI el dispositivo arrancará con la configuración por defecto, puede cambiarla accediendo a **http://wstation.local**
 Las coordenadas se pueden pegar desde google maps.
 
 ![Alt text](/images/web.png)
 
+Si no especificó un SSID y Password correctos el dispositivo arrancará en modo AP.
+Busque la WIFI 'wstation' y asociese a ella, despues, desde el navegador web vaya a http://192.168.4.1 , actualice el SSID y password, se reiniciará y podrá acabar la configuración como antes, en **http://wstation.local**
 
 ## Funcionamiento
 Después de arrancar muestra:

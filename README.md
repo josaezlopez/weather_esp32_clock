@@ -41,28 +41,48 @@ Weather station with desktop clock based on api.openweathermap.org and BME280 fo
 
 ![Alt text](/images/bme280.png)
 
-#### 2.2 inch 240x320 SPI LCD Module ILI9341:
+## Compilation
+#### Arduino IDE
 
-![Alt text](/images/TFT_2_2_ILI9341.png)
+    You need to have support for esp32 boards, look at https://espressif-docs.readthedocs-hosted.com/projects/arduino-esp32/en/latest/installing.html how to install.
 
-#### Schematic;
+    -Install Git:
+      https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
+    -Clone the repository
+      From the Arduino directory run: git clone https://github.com/josaezlopez/weather_esp32_clock.git
+    -Install the libraries
+      Change to the directory created by git: cd weather_esp32_clock
+        -On Linux run the make_arduino_ide.sh script: sh make_arduino_ide.sh
+        -On Windows run the make_arduino_ide.bat script from cmd.
+            - Install the following libraries from the IDE library manager.
+                -ArduinoJson@^6.20.1
+                -Adafruit BME280 Library@^2.2.2
+                -Adafruit Unified Sensor@^1.1.7
+                -CRC32@^2.0.0
+                -SPIFFS ImageReader Library@^1.0.0
+                -Adafruit ILI9341@^1.5.14
 
-![Alt text](/images/schematic.png)
-
-## Compilation:
-
-Before compiling, modify **lib/funcaux/conf.h** to set the ssid password of your WIFI and the openweathermaps APIKEY.
-If you do not have the BME280 sensor installed change the **ENABLE_BME280** directive to false.
-The free apikey is used, you can get the api key from here: https://openweathermap.org/price.
-
-If platformio is used, all library dependencies will be resolved correctly.
-platformio.ini comes configured with two environments: release and release_ota. release_ota allows uploading via Wi-Fi.
-After compiling and sending to esp32 it will start with the default configuration, to change it you can access **http://wstation.local**  
-The coordinates can be pasted from Google Maps.
-
+    -Run the arduino IDE and open the weather_esp32_clock.ino sketch.
+    -Configure the esp32 board used and the port it is connected to, choose the partition scheme and debug level as shown in the image:  
 ![Alt text](/images/web.png)
 
+#### PlatformIO
+    Download or clone the repository, as in the previous case, to the Platformio projects directory.
 
+##Setting
+
+####conf.h
+If you do not have the BME280 sensor installed change the **ENABLE_BME280** directive to false.
+Optionally, you can enter the SSID, password and Apikey of openweathermaps or enter it later from the access point that you will create if you cannot connect.
+The free openweathermaps apikey can be obtained from here: https://openweathermap.org/price.
+
+Compile and upload the program to the board.
+
+  
+There are three environments in platformio.ini; release, release_ota and debug. The release_ota environment uploads to the board via WIFI. The first time the program is sent it must be done by cable, using the release environment.
+
+If the correct SSID and password of your WIFI were specified, the device will boot with the default configuration, you can change it by accessing **http://wstation.local**
+The coordinates can be pasted from Google Maps.
 ## Functioning:
 
 After booting it shows:
