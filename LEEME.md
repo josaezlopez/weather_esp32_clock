@@ -78,9 +78,9 @@ Estación meteorológica con reloj de escritorio basada en api.openweathermap.or
 #### PlaformIO
     Descarge o clone el repositorio, como en el caso anterior, sobre el directorio de projectos de Platformio.
 
-##Configuración
+## Configuración
 
-####conf.h
+#### conf.h
 Si no tiene instalado el sensor BME280 cambie la directiva **ENABLE_BME280** a false. 
 Opcionalmente, puede poner el SSID, password y Apikey de openweathermaps o bien ponerlo después desde el punto de acesso que creará si no puede conectar.
 El apikey gratuito de openweathermaps se puede conseguir desde aquí: https://openweathermap.org/price.
