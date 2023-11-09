@@ -64,7 +64,8 @@ Weather station with desktop clock based on api.openweathermap.org and BME280 fo
 
     -Run the arduino IDE and open the weather_esp32_clock.ino sketch.
     -Configure the esp32 board used and the port it is connected to, choose the partition scheme and debug level as shown in the image:  
-![Alt text](/images/web.png)
+![Alt text](/images/arduino_ide_settings.png)
+
 
 #### PlatformIO
     Download or clone the repository, as in the previous case, to the Platformio projects directory.
@@ -83,6 +84,8 @@ There are three environments in platformio.ini; release, release_ota and debug. 
 
 If the correct SSID and password of your WIFI were specified, the device will boot with the default configuration, you can change it by accessing **http://wstation.local**
 The coordinates can be pasted from Google Maps.
+![Alt text](/images/web.png)
+
 ## Functioning:
 
 After booting it shows:
