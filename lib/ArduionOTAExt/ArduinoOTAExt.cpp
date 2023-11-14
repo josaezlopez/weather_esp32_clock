@@ -33,6 +33,8 @@ void ArduinoOTAExt::initOTA(){
         tft->setTextSize(3);
         tft->setCursor(0,0);
         tft->println("Downloading");
+        tft->drawRoundRect(0,200,240,20,4,ILI9341_GREEN);
+        
       })
     .onEnd([&]() {
         // reset due to task watchdog expiration
@@ -41,10 +43,12 @@ void ArduinoOTAExt::initOTA(){
         while(true);  
       })
     .onProgress([&](unsigned int progress, unsigned int total) {
-        esp_task_wdt_reset();     
-        tft->setTextSize(5);
-        tft->setCursor(75,100);
-        tft->printf("%u%%\r", (progress / (total / 100)));
+        float paso = 240.0 * ((float)progress / (float)total);
+
+        esp_task_wdt_reset();  
+        tft->printProgressBar(200,progress,total,ILI9341_GREENYELLOW,ILI9341_GREEN);   
+      
+
       })
     .onError([&](ota_error_t error) {
         tft->fillScreen(ILI9341_BLACK);

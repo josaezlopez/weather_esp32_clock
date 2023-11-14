@@ -227,7 +227,7 @@ String selectSSID(){
     String ret =  String("<select name='ssid'> id='ssid'");
     char ssidName[100];
     for(ssidInfo item : SSIDList){
-        sprintf(ssidName,"%s RSSI:%d",item.ssid,item.rssi);
+        sprintf(ssidName,"%s",item.ssid);
         ret += String("<option value='") + item.ssid + String("'>") + String(ssidName) + String("></option>");
         }
     ret += "</select>";

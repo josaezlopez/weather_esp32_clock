@@ -636,3 +636,12 @@ void Adafruit_ILI9341Ext::printUntil(char* cad,int nCars){
     print(cad);
 }
 
+void Adafruit_ILI9341Ext::printProgressBar(int y,int progress, int total,uint16_t textColor,uint16_t progressColor){
+        float paso = 240.0 * ((float)progress / (float)total);
+
+        drawRoundRect(paso,y-1,240,20+3,4,progressColor);
+        setTextSize(2);
+        setTextColor(textcolor,ILI9341_BLACK);
+        setCursor((240/2)-20,y+3);
+        printf("%u%%\r", (progress / (total / 100)));
+}
